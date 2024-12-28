@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PunchPoint Monitoring System</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700"
+    />
+    <link rel="icon" type="image/png" href="./static/images/lnt logo.png" />
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: Poppins, Helvetica, sans-serif;
+      }
+
+      .bg-img {
+        display: flex;
+        height: 94vh;
+        position: relative;
+      }
+
+      .content {
+        background-color: #1c3f60;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        font-size: 2vh;
+        position: relative;
+        z-index: 1;
+        padding-right: 30vw;
+      }
+      .content img {
+        height: 20%;
+      }
+      .content p {
+        font-size: 2.5vh;
+      }
+
+      .img {
+        width: 50%;
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1;
+        padding-right: 12vh;
+        padding-top: 7vh;
+      }
+
+      .img img {
+        width: 100%;
+        height: auto;
+      }
+      button {
+        background-color: white;
+        color: #1c3f60;
+        border: none;
+        border-radius: 3vh;
+        padding: 1.5vh 5.5vh;
+        font-size: 2.5vh;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-top: 1.5vh;
+      }
+
+      button:hover {
+        background-color: #2980b9;
+        color: white;
+      }
+
+      footer {
+        background-color: #1c3f60;
+        color: white;
+        text-align: center;
+        font-size: 2.2vh;
+        font-style: italic;
+        padding-bottom: 2.8vh; /* so that scroll bar on the main page is gone*/
+
+        /* bottom: 0;  */
+        width: 100%;
+      }
+
+      /* Extra small devices (phones, 600px and down) */
+      @media (max-width: 400px) {
+        .bg-img {
+          display: flex;
+          /* height: 94vh;*/
+          position: relative;
+        }
+
+        .content {
+          /*  background-color: #1c3f60;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          text-align: center;
+          font-size: 1.5vh;
+          position: relative;
+          z-index: 1;
+          padding-left: 22vw;*/
+
+          padding-right: 0;
+          font-size: 3vw; /* Adjust font size for mobile */
+          /*   padding-left: 5vw; /* Adjust left padding to center the text */
+          align-items: center; /* Ensure all content is centered */
+        }
+        .content img {
+          height: 14%;
+        }
+        .content p {
+          font-size: 5vw;
+        }
+
+        .img {
+          /* width: 50%;
+          position: absolute;
+          top: 0;
+          /* right: 0;
+          z-index: 1;
+          /* padding-right: 12vh;
+          padding-top: 7vh;*/
+
+          width: 55vh; /* Set to a larger percentage so it's centered */
+          height: auto;
+          /*  display: flex;
+          justify-content: center; /* Horizontally center */
+          /* margin: 2vh 0; /* Adjust margin for spacing */
+          margin-top: 30vh;
+        }
+
+        .img img {
+          width: 100%;
+          height: auto;
+          margin-left: 18vw;
+        }
+        button {
+          background-color: white;
+          color: #1c3f60;
+          border: none;
+          border-radius: 3vh;
+          padding: 1.5vh 5.5vh;
+          font-size: 2vh;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-top: 30vh;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+          color: white;
+        }
+
+        footer {
+          background-color: #1c3f60;
+          color: white;
+          text-align: center;
+          font-size: 3vw;
+          font-style: italic;
+          /* padding-bottom: 28px;
+          width: 100%;*/
+          height: 3vh;
+        }
+      }
+
+      /* Extra small devices (phones, 600px and down) */
+      @media (max-width: 400px) and (min-height: 739px) {
+        .bg-img {
+          display: flex;
+          /* height: 94vh;*/
+          position: relative;
+        }
+
+        .content {
+          /*  background-color: #1c3f60;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          text-align: center;
+          font-size: 1.5vh;
+          position: relative;
+          z-index: 1;
+          padding-left: 22vw;*/
+
+          padding-right: 0;
+          font-size: 3vw; /* Adjust font size for mobile */
+          /*   padding-left: 5vw; /* Adjust left padding to center the text */
+          align-items: center; /* Ensure all content is centered */
+        }
+        .content img {
+          height: 14%;
+        }
+        .content p {
+          font-size: 5vw;
+        }
+
+        .img {
+          /* width: 50%;
+          position: absolute;
+          top: 0;
+          /* right: 0;
+          z-index: 1;
+          /* padding-right: 12vh;
+          padding-top: 7vh;*/
+
+          width: 55vh; /* Set to a larger percentage so it's centered */
+          height: auto;
+          /*  display: flex;
+          justify-content: center; /* Horizontally center */
+          /* margin: 2vh 0; /* Adjust margin for spacing */
+          margin-top: 30vh;
+        }
+
+        .img img {
+          width: 100%;
+          height: auto;
+          margin-left: 29vw;
+        }
+        button {
+          background-color: white;
+          color: #1c3f60;
+          border: none;
+          border-radius: 3vh;
+          padding: 1.5vh 5.5vh;
+          font-size: 2vh;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-top: 30vh;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+          color: white;
+        }
+
+        footer {
+          background-color: #1c3f60;
+          color: white;
+          text-align: center;
+          font-size: 3vw;
+          font-style: italic;
+          /* padding-bottom: 28px;
+          width: 100%;*/
+          height: 3vh;
+        }
+      }
+
+      /* Extra small devices (phones, 600px and down) */
+      @media (max-width: 400px) and (min-height: 840px) {
+        .bg-img {
+          display: flex;
+          /* height: 94vh;*/
+          position: relative;
+        }
+
+        .content {
+          /*  background-color: #1c3f60;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          text-align: center;
+          font-size: 1.5vh;
+          position: relative;
+          z-index: 1;
+          padding-left: 22vw;*/
+
+          padding-right: 0;
+          font-size: 3vw; /* Adjust font size for mobile */
+          /*   padding-left: 5vw; /* Adjust left padding to center the text */
+          align-items: center; /* Ensure all content is centered */
+        }
+        .content img {
+          height: 14%;
+        }
+        .content p {
+          font-size: 5vw;
+        }
+
+        .img {
+          /* width: 50%;
+          position: absolute;
+          top: 0;
+          /* right: 0;
+          z-index: 1;
+          /* padding-right: 12vh;
+          padding-top: 7vh;*/
+
+          width: 55vh; /* Set to a larger percentage so it's centered */
+          height: auto;
+          /*  display: flex;
+          justify-content: center; /* Horizontally center */
+          /* margin: 2vh 0; /* Adjust margin for spacing */
+          margin-top: 30vh;
+        }
+
+        .img img {
+          width: 100%;
+          height: auto;
+          margin-left: 33vw;
+        }
+        button {
+          background-color: white;
+          color: #1c3f60;
+          border: none;
+          border-radius: 3vh;
+          padding: 1.5vh 5.5vh;
+          font-size: 2vh;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-top: 30vh;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+          color: white;
+        }
+
+        footer {
+          background-color: #1c3f60;
+          color: white;
+          text-align: center;
+          font-size: 3vw;
+          font-style: italic;
+          /* padding-bottom: 28px;
+          width: 100%;*/
+          height: 3vh;
+        }
+      }
+
+      /* Small devices (portrait tablets and large phones, 600px and up) */
+      @media (min-width: 401px) {
+        .bg-img {
+          display: flex;
+          height: 88vh;
+          position: relative;
+        }
+
+        .content {
+          /*  background-color: #1c3f60;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          text-align: center;
+          font-size: 1.5vh;
+          position: relative;
+          z-index: 1;
+          padding-left: 22vw;*/
+
+          padding-right: 0;
+          font-size: 3vw; /* Adjust font size for mobile */
+          /*   padding-left: 5vw; /* Adjust left padding to center the text */
+          align-items: center; /* Ensure all content is centered */
+        }
+        .content img {
+          height: 14%;
+        }
+        .content p {
+          font-size: 5vw;
+        }
+
+        .img {
+          /* width: 50%;
+          position: absolute;
+          top: 0;
+          /* right: 0;
+          z-index: 1;
+          /* padding-right: 12vh;
+          padding-top: 7vh;*/
+
+          width: 100%; /* Set to a larger percentage so it's centered */
+          height: auto;
+          /*  display: flex;
+          justify-content: center; /* Horizontally center */
+          /* margin: 2vh 0; /* Adjust margin for spacing */
+          margin-top: 30vh;
+        }
+
+        .img img {
+          width: 100%;
+          height: auto;
+          margin-left: 11vh;
+        }
+        button {
+          background-color: white;
+          color: #1c3f60;
+          border: none;
+          border-radius: 3vh;
+          padding: 1.5vh 5.5vh;
+          font-size: 2vh;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-top: 30vh;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+          color: white;
+        }
+
+        footer {
+          background-color: #1c3f60;
+          color: white;
+          text-align: center;
+          font-size: 3.5vw;
+          font-style: italic;
+          /* padding-bottom: 28px;
+          width: 100%;*/
+          height: 8vh;
+          width: 70vw;
+          padding-left: 15vw;
+          padding-right: 15vw;
+        }
+      }
+
+      /* Medium devices (landscape tablets, 768px and up) */
+      @media only screen and (min-width: 768px) {
+        .bg-img {
+          display: flex;
+          height: 75vh;
+          position: relative;
+        }
+
+        .content {
+          /*  background-color: #1c3f60;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          text-align: center;
+          font-size: 1.5vh;
+          position: relative;
+          z-index: 1;
+          padding-left: 22vw;*/
+
+          padding-right: 0;
+          font-size: 2.5vw; /* Adjust font size for mobile */
+          /*   padding-left: 5vw; /* Adjust left padding to center the text */
+          align-items: center; /* Ensure all content is centered */
+        }
+        .content img {
+          height: 14%;
+        }
+        .content p {
+          font-size: 3vw;
+        }
+
+        .img {
+          /* width: 50%;
+          position: absolute;
+          top: 0;
+          /* right: 0;
+          z-index: 1;
+          /* padding-right: 12vh;
+          padding-top: 7vh;*/
+
+          width: 80%; /* Set to a larger percentage so it's centered */
+          height: auto;
+          /*  display: flex;
+          justify-content: center; /* Horizontally center */
+          /* margin: 2vh 0; /* Adjust margin for spacing */
+          margin-top: 18vh;
+        }
+
+        .img img {
+          width: 100%;
+          height: auto;
+          margin-left: 4vh;
+        }
+        button {
+          background-color: white;
+          color: #1c3f60;
+          border: none;
+          border-radius: 3vh;
+          padding: 1.5vh 5.5vh;
+          font-size: 2vh;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-top: 30vh;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+          color: white;
+        }
+
+        footer {
+          background-color: #1c3f60;
+          color: white;
+          text-align: center;
+          font-size: 2.5vw;
+          font-style: italic;
+          /* padding-bottom: 28px;
+          width: 100%;*/
+          height: 8vh;
+          width: 70vw;
+          padding-left: 15vw;
+          padding-right: 15vw;
+        }
+      }
+
+      /* Large devices (laptops/desktops, 992px and up) */
+      @media only screen and (min-width: 992px) {
+        .bg-img {
+          display: flex;
+          height: 60vh;
+          position: relative;
+        }
+
+        .content {
+          /*  background-color: #1c3f60;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          text-align: center;
+          font-size: 1.5vh;
+          position: relative;
+          z-index: 1;
+          padding-left: 22vw;*/
+
+          padding-right: 0;
+          font-size: 1.5vw; /* Adjust font size for mobile */
+          /*   padding-left: 5vw; /* Adjust left padding to center the text */
+          align-items: center; /* Ensure all content is centered */
+        }
+        .content img {
+          height: 14%;
+        }
+        .content p {
+          font-size: 2.5vw;
+        }
+
+        .img {
+          /* width: 50%;
+          position: absolute;
+          top: 0;
+          /* right: 0;
+          z-index: 1;
+          /* padding-right: 12vh;
+          padding-top: 7vh;*/
+
+          width: 65%; /* Set to a larger percentage so it's centered */
+          height: auto;
+          /*  display: flex;
+          justify-content: center; /* Horizontally center */
+          /* margin: 2vh 0; /* Adjust margin for spacing */
+          margin-top: 10vh;
+        }
+
+        .img img {
+          width: 100%;
+          height: auto;
+          margin-left: -3vh;
+        }
+        button {
+          background-color: white;
+          color: #1c3f60;
+          border: none;
+          border-radius: 3vh;
+          padding: 0.8vh 4.5vh;
+          font-size: 2vh;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-top: 25vh;
+          margin-bottom: 2vh;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+          color: white;
+        }
+
+        footer {
+          background-color: #1c3f60;
+          color: white;
+          text-align: center;
+          font-size: 1.8vw;
+          font-style: italic;
+          /* padding-bottom: 28px;
+          width: 100%;*/
+          height: 3vh;
+          width: 70vw;
+          padding-left: 15vw;
+          padding-right: 15vw;
+        }
+      }
+
+      /* Extra large devices (large laptops and desktops, 1200px and up) */
+      @media only screen and (min-width: 1200px) {
+        .bg-img {
+          display: flex;
+          height: 94vh;
+          position: relative;
+        }
+
+        .content {
+          background-color: #1c3f60;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          text-align: center;
+          font-size: 2vh;
+          position: relative;
+          z-index: 1;
+          padding-right: 30vw;
+        }
+        .content img {
+          height: 20%;
+        }
+        .content p {
+          font-size: 2.5vh;
+        }
+
+        .img {
+          width: 50%;
+          position: absolute;
+          top: -10vh;
+          right: 4vh;
+          z-index: 1;
+        }
+
+        .img img {
+          width: 100%;
+          height: auto;
+        }
+        button {
+          background-color: white;
+          color: #1c3f60;
+          border: none;
+          border-radius: 3vh;
+          padding: 1.5vh 5.5vh;
+          font-size: 2.5vh;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-top: 1.5vh;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+          color: white;
+        }
+
+        footer {
+          background-color: #1c3f60;
+          color: white;
+          text-align: center;
+          font-size: 2.2vh;
+          font-style: italic;
+          /* so that scroll bar on the main page is gone*/
+
+          /* bottom: 0;  */
+          width: auto;
+          height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-img">
+      <div class="content">
+        <img src="./static/images/LTEH Logo.png" alt="Logo" class="logo" />
+        <h2>PunchPoint Monitoring System</h2>
+        <br>
+        <p style="font-size:1.2vw;">
+          Leverage AI for real-time punch point classification 
+          <br>
+          &
+          <br>
+          AI-Powered Query Assistance
+        </p>
+        <br>
+        <div class="img">
+          <img src="./static/images/bg.gif" />
+        </div>
+        <a href="./domain_list.html"><button>Login</button></a>
+        <!-- <a href="./domainMenu"><button>Start</button></a> -->
+      </div>
+    </div>
+
+    <footer>© Developed by LTEH - Digital Team for internal use</footer>
+  </body>
+</html>

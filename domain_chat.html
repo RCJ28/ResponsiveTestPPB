@@ -1,0 +1,5482 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.min.js"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Punch Point Bot</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700"
+    />
+    <link rel="icon" type="image/png" href="./static/images/lnt logo.png" />
+
+    <style>
+      body {
+        margin: 0;
+        font-family: Poppins, Helvetica, sans-serif;
+      }
+
+      .navbar {
+        background-color: #1c3f60;
+        color: white;
+        padding: 3vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+      }
+
+      .navbar h2 {
+        margin: 0;
+        flex-grow: 1;
+        text-align: center;
+      }
+
+      .navbar i {
+        font-size: 2.8vh;
+        cursor: pointer;
+        color: white;
+        transition: color 0.3s ease;
+        padding: 0.5vh;
+      }
+
+      .navbar i:hover {
+        color: #4275a5;
+      }
+
+      .navbar img {
+        height: 5vw;
+        width: auto;
+        margin-top: -3vh;
+        margin-bottom: -3vh;
+      }
+     
+     
+      /* preview page*/
+      /* preview page */
+      .preview h3 {
+        text-align: center;
+        font-size: 1vw;
+      }
+      .preview {
+        position: fixed;
+        top: 0;
+        right: -300px; /* Initially hide the sidebar off-screen */
+        background-color: rgb(236, 234, 234);
+        width: 300px;
+
+        overflow: auto;
+        transition: all 0.3s ease;
+        z-index: 1;
+      }
+
+      /* Sidebar when expanded */
+      .preview.expanded {
+        right: 0; /* Move the sidebar into view */
+        width: 100%;
+      }
+
+      /* Toggle button (on the right side when collapsed) */
+      #toggle-rightbar {
+        position: fixed;
+        top: 40%;
+        right: 10px;
+        font-size: 24px;
+        cursor: pointer;
+        color: white;
+        background-color: #16314b;
+        z-index: 2;
+        border-top-left-radius: 25px;
+        border-bottom-left-radius: 25px;
+        padding: 8vh 0.5vw;
+      }
+
+      /* Ensure the toggle-rightbar is visible even when sidebar is collapsed */
+      .preview.collapsed #toggle-rightbar {
+        display: block;
+      }
+
+      /* Close button (inside the sidebar) */
+      #close-rightbar {
+        position: absolute;
+        top: 20px;
+        right: 50px;
+        font-size: 30px;
+        cursor: pointer;
+        color: black;
+        display: none; /* Initially hide close button */
+      }
+
+      /* When the sidebar is expanded, show the close button */
+      .preview.expanded #close-rightbar {
+        display: block;
+      }
+
+      /* Ensure that when sidebar is collapsed, it remains small */
+      .preview.collapsed {
+        right: -300px; /* Off-screen when collapsed */
+      }
+      #preview-container {
+        /* overflow-y: auto;
+        overflow-x: auto;*/
+        /* Full height of the sidebar */
+        overflow-y: auto; /* Enable vertical scrolling */
+        overflow-x: auto;
+        max-height: calc(
+          100vh - 10vh
+        ); /* Adjust based on navbar and footer height */
+        position: relative; /* For positioning */
+        z-index: 0;
+        margin-left: 1vw;
+      }
+
+      #preview-container img {
+        width: 100%; /* Adjust image size based on your requirements */
+        height: auto;
+      }
+
+      #preview-container table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-left: 1vw;
+      }
+
+      #preview-container th,
+      #preview-container td {
+        border: 1px solid #1c3f60;
+        padding: 4px;
+        text-align: left;
+      }
+      #preview-container th {
+        background-color: #1c3f60;
+        color: white;
+        position: sticky; /* Make the header sticky */
+        top: 0; /* Stick to the top of the container */
+        z-index: 1; /* Ensure it is above other content */
+        font-weight: normal;
+        border-right: 1.5px solid white;
+        padding: 5px 15px;
+      }
+      #preview-container td {
+        border: 1px solid #1c3f60;
+      }
+      .tab-button {
+        background-color: #1c3f60;
+        color: white;
+        border: none;
+        border-radius: 1vh;
+        padding: 0.5vw 1vw;
+        font-size: 1vw;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-left: 40px;
+      }
+
+      /*----------------------------------------------*/
+
+      .content {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding-top: 1.5vh;
+        padding-bottom: 1vh;
+        background: white;
+        border-radius: 0.5vh;
+        /*box-shadow: 0 0.2vh 0.5vh rgba(0, 0, 0, 0.1);*/
+        overflow-y: auto;
+        overflow-x: hidden;
+        /*  max-height: 44vh;*/
+        height: 58vh;
+        position: relative;
+      }
+
+      /* Initially hide the loading spinner */
+      .dropdown-blur {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0; /* Adjust this depending on the sidebar width */
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        backdrop-filter: blur(3px);
+        z-index: 10; /* Make sure it's above other content */
+        display: none;
+        transition: all 0.3s ease; /* Smooth transition */
+        justify-content: center;
+        align-items: center;
+      }
+
+      .dropdown-blur img {
+        width: 20vw; /* Adjust the size as per your needs */
+        height: 40vh;
+        object-fit: contain;
+      }
+
+      /* When sidebar is expanded, show the blur effect */
+      #dropdown-menu:not(.collapsed) + .dropdown-blur {
+        display: block; /* Show blur when sidebar is expanded */
+      }
+
+      .token {
+        font-size: 1.2em;
+        display: flex;
+        align-items: center;
+        /*  justify-content: space-between; /* Space between button and text */
+        margin-right: 2vw; /* Optional: Keep space on the right */
+        padding-left: 20px;
+        position: relative;
+      }
+      .token h6 {
+        margin-left: 20px;
+        font-size: 0.8vw;
+      }
+      .login-user {
+        font-size: 0.8vw;
+        position: absolute;
+        left: 90.2vw;
+        top: 1vh;
+        right: 0;
+      }
+      .userlogo_name {
+        height: 3vh;
+        width: 2.2vw;
+        position: absolute;
+        top: 3vh;
+        left: 87.5vw;
+      }
+
+      #loading-indicator {
+        font-size: 12px;
+        position: absolute; /* Position it below the button */
+        left: 5;
+        top: 60px;
+        color: #1c3f60;
+        font-style: italic;
+      }
+
+      .message-user {
+        color: white;
+        align-self: flex-end;
+        margin-right: 20vw;
+        margin-left: auto;
+        padding: 0.5vh;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-bottom: 4vh;
+        margin-top: 4vh;
+        position: relative;
+      }
+      .message-bot {
+        /*color: white;*/
+        align-self: flex-start;
+        margin-left: 20vw;
+        margin-right: auto;
+        padding: 1vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+      }
+      .user-logo .logo-image {
+        width: 5.5vh;
+        height: 4.5vh;
+        /* padding: 0.5vh;*/
+        padding-bottom: 1vh;
+        margin-left: 1vh;
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin-left: 1vh;
+      }
+      .bot-logo .logo-image {
+        width: 6vh;
+        height: 7vh;
+        /* padding: 0.5vh;*/
+        padding-bottom: 1vh;
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin-right: 1vh;
+      }
+      .user-logo,
+      .bot-logo {
+        display: flex;
+        align-items: center;
+      }
+
+      .user-message-text {
+        background-color: #c1ccd4;
+        /* border: 0.3vh solid black; #afc3d3*/
+        color: black;
+        padding: 0.8vh;
+        padding-left: 2vh;
+        padding-right: 2vh;
+        border-radius: 1.6vh;
+
+        max-width: 35vw;
+        white-space: pre-wrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        word-spacing: 2px;
+        margin-right: 5vh;
+        margin-top: -0.5vh;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+        word-break: normal; /* Break long strings without spaces */
+        text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+        font-size: 1.8vh;
+      }
+      .user-message-paragraph {
+        margin: 0;
+        margin-bottom: 0.5vh;
+        line-height: 1.6;
+      }
+      /* .bot-message-text {
+        background-color: #e2eef8;
+        padding: 0.8vh;
+        padding-left: 2vh;
+  padding-right: 2vh;
+  margin-top: 1vh;
+  color: black;
+  margin-left: 5vh;
+  border-radius: 1.6vh;
+ 
+  max-width: 68%;
+  word-spacing: 2px;
+  position: relative;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  display: inline-block; 
+  width: auto;
+        
+      }*/
+
+      .bot-message-text {
+        background-color: #e2eef8;
+        padding: 0.8vh 2vh;
+        margin-top: 1vh;
+        color: black;
+        margin-left: 5vh;
+        border-radius: 1.6vh;
+        word-spacing: 2px;
+        position: relative;
+        word-wrap: break-word;
+        display: inline-block;
+        white-space: normal;
+        max-width: 52vw;
+        overflow-x: auto;
+        font-size: 1.8vh;
+        /* Keep flex for layout control */
+      }
+      .bot-message-text p {
+        position: relative;
+        word-wrap: break-word;
+        white-space: normal;
+      }
+      .bot-message-text ol {
+        position: relative;
+        word-wrap: break-word;
+        display: inline-block;
+        white-space: normal;
+      }
+
+      .bot-message-paragraph {
+        margin: 0;
+        text-wrap: wrap;
+        line-height: 1.6;
+      }
+
+      .bot-message-text img {
+        height: 40vh;
+        width: auto;
+      }
+
+      .copy-container {
+        position: absolute; /* Absolutely positioned within the bot message container */
+        bottom: -10px; /* Distance from the bottom */
+        left: 6vh; /* Distance from the left */
+        display: flex;
+        align-items: center;
+      }
+
+      .copy-icon {
+        font-size: 1.6vh;
+        color: #000;
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
+
+      .copy-icon:hover {
+        color: #9d9da0;
+      }
+
+      .tooltip {
+        visibility: hidden;
+        background-color: #555;
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px;
+        position: absolute;
+        z-index: 1;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -60px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .copy-container:hover .tooltip {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .copied-text {
+        font-size: 0.8em;
+        color: #16314b;
+        margin-left: 5px;
+      }
+      .thumbs-container {
+        position: absolute; /* Absolutely positioned within the bot message container */
+        bottom: -10px; /* Distance from the bottom */
+        right: 2vw; /* Distance from the left */
+        display: flex;
+        align-items: center;
+      }
+
+      .thumbs-up-icon,
+      .thumbs-down-icon {
+        font-size: 1.6vh;
+        color: #000;
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
+      .thumbs-down-container {
+        position: absolute; /* Absolutely positioned within the bot message container */
+        bottom: -10px; /* Distance from the bottom */
+        right: 1vw;
+        display: flex;
+        align-items: center;
+      }
+      .thumbs-up-icon:hover,
+      .thumbs-down-icon:hover {
+        color: #9d9da0;
+      }
+
+      .Thanks-text {
+        font-size: 0.8em;
+        color: #16314b;
+        margin-bottom: -5vh;
+        margin-left: 4vw;
+        /* display: inline-block; 
+        max-width: 100px; 
+        word-wrap: break-word; 
+        white-space: normal; */
+      }
+      .input-container {
+        display: flex;
+        align-items: center;
+        position: fixed;
+        bottom: 4em;
+        left: 20vw;
+        right: 20vw;
+        /*40VH*/
+      }
+
+      .input-container i {
+        font-size: 2vh;
+      }
+      /* input[type="text"] {
+        flex-grow: 1; 
+        padding: 1.1vh;
+        font-size: 2vh;
+        border-radius: 1vh;
+        border: 0.3vh solid #ccc;
+        margin-right: 1vh; 
+      } */
+
+      textarea {
+        flex-grow: 1;
+        padding: 1.1vh;
+        font-size: 1vw;
+        border-radius: 1vh;
+        border: 0.3vh solid #ccc;
+        margin-right: 1vh;
+        overflow: hidden; /* Prevent scrollbar */
+        resize: none; /* Disable manual resizing */
+        box-sizing: border-box;
+        white-space: pre-wrap; /* Allow wrapping */
+        font-family: Poppins, Helvetica, sans-serif;
+      }
+
+      .image-container {
+        position: relative;
+        width: auto;
+        height: 300px;
+        overflow: hidden;
+      }
+
+      .image-container img {
+        width: auto;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .download-icon {
+        position: absolute;
+        bottom: 85%;
+        left: 90%;
+        font-size: 2vh;
+        color: #fff;
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        transform: translateX(-50%);
+        padding: 1vh;
+        transition: color 0.3s ease;
+      }
+
+      .download-icon:hover {
+        color: #9cbfdf;
+      }
+
+      button {
+        background-color: #1c3f60;
+        color: white;
+        border: none;
+        border-radius: 1vh;
+        padding: 0.5vw 1vw;
+        font-size: 1.2vw;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-right: 10px;
+      }
+
+      button:hover {
+        background-color: #2980b9;
+      }
+      .typing-indicator {
+        color: #1c3f60;
+        font-style: italic;
+        margin-left: 0.5vw;
+        margin-top: 1vh;
+        font-size: 1em;
+      }
+      .typing-indicator-container {
+        display: flex; /* Use flexbox for alignment */
+        align-items: center; /* Center vertically */
+      }
+
+      .botlogo {
+        margin-left: 20vw;
+      }
+      .logoimage {
+        width: 6vh;
+        height: 7vh;
+        /* padding: 0.5vh;*/
+        padding-bottom: 1vh;
+      }
+
+      footer {
+        color: #1c3f60;
+        text-align: center;
+        position: fixed;
+        bottom: 1em;
+        left: 0;
+        right: 0;
+        font-size: 1vw;
+        font-style: italic;
+        padding: 1vh 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse; /* Ensures that the borders are collapsed */
+        margin: 10px 0;
+      }
+
+      table th,
+      table td {
+        border: 1px solid black; /* Add a light gray border */
+        padding: 8px; /* Padding for cells */
+        text-align: left; /* Align text to the left */
+        background-color: white;
+      }
+
+      table th {
+        background-color: #1c3f60;
+        color: white;
+      }
+      #report-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      #report-button:disabled:hover {
+        background-color: grey;
+        cursor: not-allowed;
+      }
+
+      .dropdown-item:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      .dropdown-item:disabled:hover {
+        background-color: grey;
+        cursor: not-allowed;
+      }
+
+      /*  #suggestions-container {
+        position: absolute;
+        /*top:70vh;
+        bottom: 13vh;
+        left: 20vw;
+        margin-bottom: 2vh;
+        background-color: #f6f7f8;
+        padding: 1vh;
+
+        border-top: none;
+        z-index: 10;
+        display: none;
+        max-width: 55vw;
+        max-height: 20vh;
+        overflow: auto;
+        border: 1px solid #5983ac;
+        scrollbar-width: thin;
+      }*/
+
+      #suggestions-container {
+        position: fixed;
+        /*  top: 70vh;*/
+        /* bottom: 13vh;*/
+        /*  bottom: 8em;*/
+        left: 20vw;
+        margin-bottom: 1vh;
+        background-color: #f6f7f8;
+        padding: 1vh;
+        border-top: none;
+        z-index: 10;
+        display: none;
+        /* max-width: 55vw;*/
+        width: 55vw;
+        max-height: 20vh;
+        overflow: auto;
+        border: 1px solid #5983ac;
+        scrollbar-width: thin;
+      }
+
+      .suggestion {
+        cursor: pointer;
+        border: 1px solid #a6d0f3;
+        background-color: white;
+        padding: 0.7vh;
+        padding-left: 2vh;
+        padding-right: 2vh;
+        border-radius: 1.6vh;
+        margin-bottom: 5px;
+        position: relative;
+        word-wrap: break-word;
+        display: inline-block;
+        white-space: normal;
+        width: 45vw;
+        /* margin-right: 5vh;*/
+        font-size: 0.8vw;
+      }
+
+      .suggestion:hover {
+        background-color: #e2eef8;
+      }
+
+      /*Heading*/
+      #tittle {
+        font-size: 2vh;
+        color: #7c7c7e;
+      }
+
+      #suggestions-container h2 {
+        position: sticky; /* Make the heading stick to the top of the container */
+        top: 0;
+        background-color: #f6f7f8;
+        z-index: 1;
+        padding: 1vh;
+
+        margin: 0;
+        margin-bottom: 1vh;
+      }
+
+      #see-more {
+        position: absolute;
+        bottom: 1vh;
+        right: 1vw;
+        font-size: 0.7vw;
+        padding: 1vh 1vw;
+        cursor: pointer;
+        color: white;
+        background-color: #5983ac;
+        border: none;
+        display: none; /* Hidden initially */
+        z-index: 100;
+      }
+      #see-more:hover {
+        background-color: #4f7599;
+        color: white;
+      }
+      /*Media Queries*/
+      @media (min-width: 768px) {
+        .bot-message-text {
+          max-width: 47vw; /* Increase the max width for medium-sized screens */
+        }
+        .content {
+          height: 48vh;
+        }
+      }
+
+      @media (min-width: 768px) and (min-height: 700px) {
+        .bot-message-text {
+          max-width: 44vw; /* Increase the max width for medium-sized screens */
+        }
+        .content {
+          height: 54vh;
+        }
+      }
+
+      /* For small laptops and tablets (up to 1200px) */
+      /*  @media (max-width: 1200px) {
+        .bot-message-text {
+          max-width: 51vw;
+        }
+      }*/
+
+      /* For medium-sized screens (e.g., laptops) */
+      /*@media (min-height: 1070px) and (max-height: 1100px) {
+        .bot-message-text {
+          max-width: 50vw;
+        }
+      }*/
+
+      /* For larger laptops (1201px to 1400px) */
+      @media (min-width: 1201px) and (max-width: 1300px) {
+        .bot-message-text {
+          max-width: 46vw; /* Adjusted for larger screens */
+        }
+        .content {
+          height: 55vh;
+        }
+      }
+
+      @media (min-width: 1301px) and (max-width: 1400px) {
+        .bot-message-text {
+          max-width: 47.5vw;
+        }
+        .content {
+          height: 53vh;
+        }
+      }
+
+      /* For desktops (1401px to 1500px) */
+      @media (min-width: 1401px) and (max-width: 1500px) {
+        .bot-message-text {
+          max-width: 46.5vw;
+        }
+        .content {
+          height: 56vh;
+        }
+      }
+      @media (min-width: 1501px) {
+        .bot-message-text {
+          max-width: 46.5vw;
+        }
+        .content {
+          height: 57vh;
+        }
+      }
+      /* For very large screens (e.g., desktops with high resolution) */
+      @media (min-width: 1600px) and (max-width: 1670px) {
+        .bot-message-text {
+          max-width: 47.5vw;
+        }
+      }
+      @media (min-width: 1900px) and (max-height: 1100px) {
+        .bot-message-text {
+          max-width: 48.5vw;
+        }
+        .content {
+          height: 58vh;
+        }
+      }
+
+      /*for mobile*/
+      /* Extra small devices (phones, 600px and down) */
+      @media (max-width: 400px) {
+        .navbar {
+          background-color: #1c3f60;
+          color: white;
+          padding: 3vh;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+
+        .navbar h2 {
+          margin: 0;
+          flex-grow: 1;
+          text-align: center;
+          font-size: 4.5vw;
+        }
+
+        .navbar i {
+          font-size: 2vh;
+          cursor: pointer;
+          color: white;
+          transition: color 0.3s ease;
+          padding: 0.5vh;
+        }
+
+        .navbar i:hover {
+          color: #4275a5;
+        }
+
+        .navbar img {
+          height: 7vw;
+          width: auto;
+          margin-top: -3vh;
+          margin-bottom: -3vh;
+        }
+
+        .token {
+          font-size: 1.2em;
+          display: flex;
+          align-items: center;
+          /*  justify-content: space-between; /* Space between button and text */
+          margin-right: 2vw; /* Optional: Keep space on the right */
+          padding-left: 20px;
+          position: relative;
+        }
+        .token h6 {
+          margin-left: -8px;
+          font-size: 2.5vw;
+        }
+        .login-user {
+          font-size: 2.2vw;
+          position: absolute;
+          left: 75vw;
+          top: 1vh;
+          right: 0;
+        }
+        .userlogo_name {
+          height: 2vh;
+          width: 5vw;
+          position: absolute;
+          top: 2.6vh;
+          left: 70vw;
+        }
+
+        #loading-indicator {
+          font-size: 12px;
+          position: absolute; /* Position it below the button */
+          left: 5;
+          top: 60px;
+          color: #1c3f60;
+          font-style: italic;
+        }
+
+        .content {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          padding-top: 1.5vh;
+          padding-bottom: 1vh;
+          background: white;
+          border-radius: 0.5vh;
+          /*box-shadow: 0 0.2vh 0.5vh rgba(0, 0, 0, 0.1);*/
+          overflow-y: auto;
+          overflow-x: hidden;
+          /*  max-height: 44vh;*/
+          height: 58vh;
+          position: relative;
+        }
+
+        /* Initially hide the loading spinner */
+        .dropdown-blur {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0; /* Adjust this depending on the sidebar width */
+          background-color: rgba(
+            0,
+            0,
+            0,
+            0.5
+          ); /* Semi-transparent background */
+          backdrop-filter: blur(3px);
+          z-index: 10; /* Make sure it's above other content */
+          display: none;
+          transition: all 0.3s ease; /* Smooth transition */
+          justify-content: center;
+          align-items: center;
+        }
+
+        .dropdown-blur img {
+          width: 20vw; /* Adjust the size as per your needs */
+          height: 40vh;
+          object-fit: contain;
+        }
+
+        /* When sidebar is expanded, show the blur effect */
+        #dropdown-menu:not(.collapsed) + .dropdown-blur {
+          display: block; /* Show blur when sidebar is expanded */
+        }
+
+        .message-user {
+          color: white;
+          align-self: flex-end;
+          margin-right: 20vw;
+          margin-left: auto;
+          padding: 0.5vh;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          margin-bottom: 4vh;
+          margin-top: 4vh;
+          position: relative;
+        }
+        .message-bot {
+          /*color: white;*/
+          align-self: flex-start;
+          margin-left: 20vw;
+          margin-right: auto;
+          padding: 1vh;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+        .user-logo .logo-image {
+          width: 4vh;
+          height: 3.5vh;
+          /* padding: 0.5vh;
+          padding-bottom: 1vh;
+          margin-left: 1vh;*/
+          position: absolute;
+          top: -0.6vh;
+          right: -4vw;
+          margin-left: 1vh;
+        }
+        .bot-logo .logo-image {
+          width: 4.5vh;
+          height: 5vh;
+          /* padding: 0.5vh;*/
+          padding-bottom: 1vh;
+          position: absolute;
+          top: 0.7vh;
+          left: -10vw;
+          /*margin-right: 1vh;*/
+        }
+        .user-logo,
+        .bot-logo {
+          display: flex;
+          align-items: center;
+        }
+
+        .user-message-text {
+          background-color: #c1ccd4;
+          /* border: 0.3vh solid black; #afc3d3*/
+          color: black;
+          padding: 0.8vh;
+          padding-left: 2vh;
+          padding-right: 2vh;
+          border-radius: 1.6vh;
+
+          max-width: 35vw;
+          white-space: pre-wrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: inline-block;
+          word-spacing: 2px;
+          margin-right: 3vw;
+          margin-top: -1vh;
+
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          word-break: normal; /* Break long strings without spaces */
+          text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+          font-size: 1.5vh;
+        }
+        .user-message-paragraph {
+          margin: 0;
+          margin-bottom: 0.5vh;
+          line-height: 1.6;
+        }
+
+        .bot-message-text {
+          background-color: #e2eef8;
+          padding: 0.4vh 2vh;
+          margin-top: 1vh;
+          color: black;
+          margin-left: 5vh;
+          border-radius: 1.6vh;
+          word-spacing: 2px;
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+          max-width: 52vw;
+          overflow-x: auto;
+          font-size: 1.5vh;
+          margin-left: -3vw;
+        }
+        .bot-message-text p {
+          position: relative;
+          word-wrap: break-word;
+          white-space: normal;
+        }
+        .bot-message-text ol {
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+        }
+
+        .bot-message-paragraph {
+          margin: 0;
+          text-wrap: wrap;
+          line-height: 1.6;
+        }
+
+        .bot-message-text img {
+          height: 40vh;
+          width: auto;
+        }
+
+        .copy-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -10px; /* Distance from the bottom */
+          left: 0; /* Distance from the left */
+          display: flex;
+          align-items: center;
+        }
+
+        .copy-icon {
+          font-size: 1.3vh;
+          color: #000;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+
+        .copy-icon:hover {
+          color: #9d9da0;
+        }
+
+        .tooltip {
+          visibility: hidden;
+          background-color: #555;
+          color: #fff;
+          text-align: center;
+          border-radius: 6px;
+          padding: 5px;
+          position: absolute;
+          z-index: 1;
+          bottom: 125%;
+          left: 50%;
+          margin-left: -60px;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+
+        .copy-container:hover .tooltip {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        .copied-text {
+          font-size: 0.8em;
+          color: #16314b;
+          margin-left: 5px;
+        }
+        .thumbs-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -10px; /* Distance from the bottom */
+          right: 6vw; /* Distance from the left */
+          display: flex;
+          align-items: center;
+        }
+
+        .thumbs-up-icon,
+        .thumbs-down-icon {
+          font-size: 1.4vh;
+          color: #000;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+        .thumbs-down-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -10px; /* Distance from the bottom */
+          right: 3vw;
+          display: flex;
+          align-items: center;
+        }
+        .thumbs-up-icon:hover,
+        .thumbs-down-icon:hover {
+          color: #9d9da0;
+        }
+
+        .Thanks-text {
+          font-size: 0.8em;
+          color: #16314b;
+          margin-bottom: -5vh;
+          margin-left: 4vw;
+          /* display: inline-block; 
+          max-width: 100px; 
+          word-wrap: break-word; 
+          white-space: normal; */
+        }
+        .input-container {
+          display: flex;
+          align-items: center;
+          position: fixed;
+          bottom: 4em;
+          left: 10vw;
+          right: 10vw;
+          /*40VH*/
+        }
+
+        .input-container i {
+          font-size: 2vh;
+        }
+        /* input[type="text"] {
+          flex-grow: 1; 
+          padding: 1.1vh;
+          font-size: 2vh;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh; 
+        } */
+
+        textarea {
+          flex-grow: 1;
+          padding: 1.1vh;
+          font-size: 1.9vw;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh;
+          overflow: hidden; /* Prevent scrollbar */
+          resize: none; /* Disable manual resizing */
+          box-sizing: border-box;
+          white-space: pre-wrap; /* Allow wrapping */
+          font-family: Poppins, Helvetica, sans-serif;
+        }
+
+        .image-container {
+          position: relative;
+          width: auto;
+          height: 200px;
+          overflow: hidden;
+        }
+
+        .image-container img {
+          width: auto;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .download-icon {
+          position: absolute;
+          bottom: 85%;
+          left: 90%;
+          font-size: 2vh;
+          color: #fff;
+          background-color: rgba(0, 0, 0, 0.5);
+          border-radius: 50%;
+          transform: translateX(-50%);
+          padding: 1vh;
+          transition: color 0.3s ease;
+        }
+
+        .download-icon:hover {
+          color: #9cbfdf;
+        }
+
+        button {
+          background-color: #1c3f60;
+          color: white;
+          border: none;
+          border-radius: 1vh;
+          padding: 1.2vw 1.2vw;
+          font-size: 1.2vw;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-right: 10px;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+        }
+
+        .typing-indicator {
+          color: #1c3f60;
+          font-style: italic;
+          margin-left: 0vw;
+          margin-top: 0vh;
+          font-size: 1.5vh;
+        }
+        .typing-indicator-container {
+          display: flex; /* Use flexbox for alignment */
+          align-items: center; /* Center vertically */
+        }
+
+        .botlogo {
+          margin-left: 10vw;
+        }
+
+        /*margin-right: 1vh;*/
+        .logoimage {
+          width: 4.5vh;
+          height: 5vh;
+          /* padding: 0.5vh;*/
+          /* padding-bottom: 1vh;*/
+        }
+
+        footer {
+          color: #1c3f60;
+          text-align: center;
+          position: fixed;
+          bottom: 1em;
+          left: 0;
+          right: 0;
+          font-size: 2.6vw;
+          font-style: italic;
+          padding: 1vh 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse; /* Ensures that the borders are collapsed */
+          margin: 10px 0;
+        }
+
+        table th,
+        table td {
+          border: 1px solid black; /* Add a light gray border */
+          padding: 8px; /* Padding for cells */
+          text-align: left; /* Align text to the left */
+          background-color: white;
+        }
+
+        table th {
+          background-color: #1c3f60;
+          color: white;
+        }
+        #report-button:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
+        #report-button:disabled:hover {
+          background-color: grey;
+          cursor: not-allowed;
+        }
+
+        .dropdown-item:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+        .dropdown-item:disabled:hover {
+          background-color: grey;
+          cursor: not-allowed;
+        }
+
+        /*  #suggestions-container {
+          position: absolute;
+          /*top:70vh;
+          bottom: 13vh;
+          left: 20vw;
+          margin-bottom: 2vh;
+          background-color: #f6f7f8;
+          padding: 1vh;
+  
+          border-top: none;
+          z-index: 10;
+          display: none;
+          max-width: 55vw;
+          max-height: 20vh;
+          overflow: auto;
+          border: 1px solid #5983ac;
+          scrollbar-width: thin;
+        }*/
+
+        #suggestions-container {
+          position: fixed;
+          /*  top: 70vh;*/
+          /* bottom: 13vh;*/
+          /*  bottom: 8em;*/
+          left: 10vw;
+          margin-bottom: 1vh;
+          background-color: #f6f7f8;
+          padding: 1vh;
+          border-top: none;
+          z-index: 10;
+          display: none;
+          /* max-width: 55vw;*/
+          width: 70vw;
+          max-height: 20vh;
+          overflow: auto;
+          border: 1px solid #5983ac;
+          scrollbar-width: thin;
+        }
+
+        .suggestion {
+          cursor: pointer;
+          border: 1px solid #a6d0f3;
+          background-color: white;
+          padding: 0.7vh;
+          padding-left: 2vh;
+          padding-right: 2vh;
+          border-radius: 1.6vh;
+          margin-bottom: 5px;
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+          width: 55vw;
+          /* margin-right: 5vh;*/
+          font-size: 2.2vw;
+        }
+
+        .suggestion:hover {
+          background-color: #e2eef8;
+        }
+
+        /*Heading*/
+        #tittle {
+          font-size: 1.8vh;
+          color: #7c7c7e;
+        }
+
+        #suggestions-container h2 {
+          position: sticky; /* Make the heading stick to the top of the container */
+          top: 0;
+          background-color: #f6f7f8;
+          z-index: 1;
+          padding: 1vh;
+
+          margin: 0;
+          margin-bottom: 1vh;
+        }
+
+        #see-more {
+          position: absolute;
+          bottom: 1vh;
+          right: 1vw;
+          font-size: 2vw;
+          padding: 0.7vh 0.7vw;
+          cursor: pointer;
+          color: white;
+          background-color: #5983ac;
+          border: none;
+          display: none; /* Hidden initially */
+          z-index: 100;
+        }
+        #see-more:hover {
+          background-color: #4f7599;
+          color: white;
+        }
+      }
+
+      /* Extra small devices (phones, 600px and down) */
+      @media (max-width: 400px) and (min-height: 739px) {
+      }
+
+      /* Extra small devices (phones, 600px and down) */
+      @media (max-width: 400px) and (min-height: 840px) {
+        .token {
+          font-size: 1.2em;
+          display: flex;
+          align-items: center;
+          /*  justify-content: space-between; /* Space between button and text */
+          margin-right: 2vw; /* Optional: Keep space on the right */
+          padding-left: 20px;
+          position: relative;
+        }
+        .token h6 {
+          margin-left: -8px;
+          font-size: 2.5vw;
+        }
+        .login-user {
+          font-size: 2.2vw;
+          position: absolute;
+          left: 75vw;
+          top: 1vh;
+          right: 0;
+        }
+        .userlogo_name {
+          height: 2vh;
+          width: 5vw;
+          position: absolute;
+          top: 2.1vh;
+          left: 70vw;
+        }
+
+        .input-container {
+          display: flex;
+          align-items: center;
+          position: fixed;
+          bottom: 4em;
+          left: 10vw;
+          right: 10vw;
+          /*40VH*/
+        }
+
+        .input-container i {
+          font-size: 2vh;
+        }
+        /* input[type="text"] {
+          flex-grow: 1; 
+          padding: 1.1vh;
+          font-size: 2vh;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh; 
+        } */
+
+        textarea {
+          flex-grow: 1;
+          padding: 1.1vh;
+          font-size: 1.3vh;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh;
+          overflow: hidden; /* Prevent scrollbar */
+          resize: none; /* Disable manual resizing */
+          box-sizing: border-box;
+          white-space: pre-wrap; /* Allow wrapping */
+          font-family: Poppins, Helvetica, sans-serif;
+        }
+        button {
+          background-color: #1c3f60;
+          color: white;
+          border: none;
+          border-radius: 1vh;
+          padding: 1.5vw 1.8vw;
+          font-size: 1.2vw;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-right: 10px;
+        }
+      }
+
+      /* Small devices (portrait tablets and large phones, 600px and up) */
+      @media (min-width: 401px) {
+        .navbar {
+          background-color: #1c3f60;
+          color: white;
+          padding: 3vh;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+
+        .navbar h2 {
+          margin: 0;
+          flex-grow: 1;
+          text-align: center;
+          font-size: 4.5vw;
+        }
+
+        .navbar i {
+          font-size: 2vh;
+          cursor: pointer;
+          color: white;
+          transition: color 0.3s ease;
+          padding: 0.5vh;
+        }
+
+        .navbar i:hover {
+          color: #4275a5;
+        }
+
+        .navbar img {
+          height: 7vw;
+          width: auto;
+          margin-top: -3vh;
+          margin-bottom: -3vh;
+        }
+
+        .token {
+          font-size: 1.2em;
+          display: flex;
+          align-items: center;
+          /*  justify-content: space-between; /* Space between button and text */
+          margin-right: 2vw; /* Optional: Keep space on the right */
+          padding-left: 20px;
+          position: relative;
+        }
+        .token h6 {
+          margin-left: -8px;
+          font-size: 2.5vw;
+        }
+        .login-user {
+          font-size: 2.2vw;
+          position: absolute;
+          left: 75vw;
+          top: 1vh;
+          right: 0;
+        }
+        .userlogo_name {
+          height: 2vh;
+          width: 5vw;
+          position: absolute;
+          top: 2.6vh;
+          left: 70vw;
+        }
+
+        #loading-indicator {
+          font-size: 12px;
+          position: absolute; /* Position it below the button */
+          left: 5;
+          top: 60px;
+          color: #1c3f60;
+          font-style: italic;
+        }
+
+        .content {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          padding-top: 1.5vh;
+          padding-bottom: 1vh;
+          background: white;
+          border-radius: 0.5vh;
+          /*box-shadow: 0 0.2vh 0.5vh rgba(0, 0, 0, 0.1);*/
+          overflow-y: auto;
+          overflow-x: hidden;
+          /*  max-height: 44vh;*/
+          height: 58vh;
+          position: relative;
+        }
+
+        /* Initially hide the loading spinner */
+        .dropdown-blur {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0; /* Adjust this depending on the sidebar width */
+          background-color: rgba(
+            0,
+            0,
+            0,
+            0.5
+          ); /* Semi-transparent background */
+          backdrop-filter: blur(3px);
+          z-index: 10; /* Make sure it's above other content */
+          display: none;
+          transition: all 0.3s ease; /* Smooth transition */
+          justify-content: center;
+          align-items: center;
+        }
+
+        .dropdown-blur img {
+          width: 20vw; /* Adjust the size as per your needs */
+          height: 40vh;
+          object-fit: contain;
+        }
+
+        /* When sidebar is expanded, show the blur effect */
+        #dropdown-menu:not(.collapsed) + .dropdown-blur {
+          display: block; /* Show blur when sidebar is expanded */
+        }
+
+        .message-user {
+          color: white;
+          align-self: flex-end;
+          margin-right: 20vw;
+          margin-left: auto;
+          padding: 0.5vh;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          margin-bottom: 4vh;
+          margin-top: 4vh;
+          position: relative;
+        }
+        .message-bot {
+          /*color: white;*/
+          align-self: flex-start;
+          margin-left: 20vw;
+          margin-right: auto;
+          padding: 1vh;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+        .user-logo .logo-image {
+          width: 3.8vh;
+          height: 3.2vh;
+          /* padding: 0.5vh;
+          padding-bottom: 1vh;
+          margin-left: 1vh;*/
+          position: absolute;
+          top: -0.6vh;
+          right: -4vw;
+          margin-left: 1vh;
+        }
+        .bot-logo .logo-image {
+          width: 4.5vh;
+          height: 5vh;
+          /* padding: 0.5vh;*/
+          padding-bottom: 1vh;
+          position: absolute;
+          top: 0.7vh;
+          left: -10vw;
+          /*margin-right: 1vh;*/
+        }
+        .user-logo,
+        .bot-logo {
+          display: flex;
+          align-items: center;
+        }
+
+        .user-message-text {
+          background-color: #c1ccd4;
+          /* border: 0.3vh solid black; #afc3d3*/
+          color: black;
+          padding: 0.4vh;
+          padding-left: 2vh;
+          padding-right: 2vh;
+          border-radius: 1.6vh;
+
+          max-width: 35vw;
+          white-space: pre-wrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: inline-block;
+          word-spacing: 2px;
+          margin-right: 3vw;
+          margin-top: -1vh;
+
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          word-break: normal; /* Break long strings without spaces */
+          text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+          font-size: 1.5vh;
+        }
+        .user-message-paragraph {
+          margin: 0;
+          margin-bottom: 0.5vh;
+          line-height: 1.6;
+        }
+
+        .bot-message-text {
+          background-color: #e2eef8;
+          padding: 0.4vh 2vh;
+          margin-top: 1vh;
+          color: black;
+          margin-left: 5vh;
+          border-radius: 1.6vh;
+          word-spacing: 2px;
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+          max-width: 52vw;
+          overflow-x: auto;
+          font-size: 1.5vh;
+          margin-left: -3vw;
+        }
+        .bot-message-text p {
+          position: relative;
+          word-wrap: break-word;
+          white-space: normal;
+        }
+        .bot-message-text ol {
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+        }
+
+        .bot-message-paragraph {
+          margin: 0;
+          text-wrap: wrap;
+          line-height: 1.6;
+        }
+
+        .bot-message-text img {
+          height: 40vh;
+          width: auto;
+        }
+
+        .copy-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -10px; /* Distance from the bottom */
+          left: 0; /* Distance from the left */
+          display: flex;
+          align-items: center;
+        }
+
+        .copy-icon {
+          font-size: 1.3vh;
+          color: #000;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+
+        .copy-icon:hover {
+          color: #9d9da0;
+        }
+
+        .tooltip {
+          visibility: hidden;
+          background-color: #555;
+          color: #fff;
+          text-align: center;
+          border-radius: 6px;
+          padding: 5px;
+          position: absolute;
+          z-index: 1;
+          bottom: 125%;
+          left: 50%;
+          margin-left: -60px;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+
+        .copy-container:hover .tooltip {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        .copied-text {
+          font-size: 0.8em;
+          color: #16314b;
+          margin-left: 5px;
+        }
+        .thumbs-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -10px; /* Distance from the bottom */
+          right: 6vw; /* Distance from the left */
+          display: flex;
+          align-items: center;
+        }
+
+        .thumbs-up-icon,
+        .thumbs-down-icon {
+          font-size: 1.4vh;
+          color: #000;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+        .thumbs-down-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -10px; /* Distance from the bottom */
+          right: 3vw;
+          display: flex;
+          align-items: center;
+        }
+        .thumbs-up-icon:hover,
+        .thumbs-down-icon:hover {
+          color: #9d9da0;
+        }
+
+        .Thanks-text {
+          font-size: 0.8em;
+          color: #16314b;
+          margin-bottom: -5vh;
+          margin-left: 4vw;
+          /* display: inline-block; 
+          max-width: 100px; 
+          word-wrap: break-word; 
+          white-space: normal; */
+        }
+        .input-container {
+          display: flex;
+          align-items: center;
+          position: fixed;
+          bottom: 6em;
+          left: 10vw;
+          right: 10vw;
+          /*40VH*/
+        }
+
+        .input-container i {
+          font-size: 2vh;
+        }
+        /* input[type="text"] {
+          flex-grow: 1; 
+          padding: 1.1vh;
+          font-size: 2vh;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh; 
+        } */
+
+        textarea {
+          flex-grow: 1;
+          padding: 0.8vh;
+          font-size: 1.5vh;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh;
+          overflow: hidden; /* Prevent scrollbar */
+          resize: none; /* Disable manual resizing */
+          box-sizing: border-box;
+          white-space: pre-wrap; /* Allow wrapping */
+          font-family: Poppins, Helvetica, sans-serif;
+        }
+
+        .image-container {
+          position: relative;
+          width: auto;
+          height: 200px;
+          overflow: hidden;
+        }
+
+        .image-container img {
+          width: auto;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .download-icon {
+          position: absolute;
+          bottom: 85%;
+          left: 90%;
+          font-size: 2vh;
+          color: #fff;
+          background-color: rgba(0, 0, 0, 0.5);
+          border-radius: 50%;
+          transform: translateX(-50%);
+          padding: 1vh;
+          transition: color 0.3s ease;
+        }
+
+        .download-icon:hover {
+          color: #9cbfdf;
+        }
+
+        button {
+          background-color: #1c3f60;
+          color: white;
+          border: none;
+          border-radius: 1vh;
+          padding: 1.2vw 1.2vw;
+          font-size: 1.2vw;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-right: 10px;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+        }
+
+        .typing-indicator {
+          color: #1c3f60;
+          font-style: italic;
+          margin-left: 0vw;
+          margin-top: 0vh;
+          font-size: 1.5vh;
+        }
+        .typing-indicator-container {
+          display: flex; /* Use flexbox for alignment */
+          align-items: center; /* Center vertically */
+        }
+
+        .botlogo {
+          margin-left: 10vw;
+        }
+
+        /*margin-right: 1vh;*/
+        .logoimage {
+          width: 4.5vh;
+          height: 5vh;
+          /* padding: 0.5vh;*/
+          /* padding-bottom: 1vh;*/
+        }
+
+        footer {
+          color: #1c3f60;
+          text-align: center;
+          position: fixed;
+          bottom: 4em;
+          left: 0;
+          right: 0;
+          font-size: 2.6vw;
+          font-style: italic;
+          padding: 1vh 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse; /* Ensures that the borders are collapsed */
+          margin: 10px 0;
+        }
+
+        table th,
+        table td {
+          border: 1px solid black; /* Add a light gray border */
+          padding: 8px; /* Padding for cells */
+          text-align: left; /* Align text to the left */
+          background-color: white;
+        }
+
+        table th {
+          background-color: #1c3f60;
+          color: white;
+        }
+        #report-button:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
+        #report-button:disabled:hover {
+          background-color: grey;
+          cursor: not-allowed;
+        }
+
+        .dropdown-item:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+        .dropdown-item:disabled:hover {
+          background-color: grey;
+          cursor: not-allowed;
+        }
+
+        /*  #suggestions-container {
+          position: absolute;
+          /*top:70vh;
+          bottom: 13vh;
+          left: 20vw;
+          margin-bottom: 2vh;
+          background-color: #f6f7f8;
+          padding: 1vh;
+  
+          border-top: none;
+          z-index: 10;
+          display: none;
+          max-width: 55vw;
+          max-height: 20vh;
+          overflow: auto;
+          border: 1px solid #5983ac;
+          scrollbar-width: thin;
+        }*/
+
+        #suggestions-container {
+          position: fixed;
+          /*  top: 70vh;*/
+          /* bottom: 13vh;*/
+          /*  bottom: 8em;*/
+          left: 10vw;
+          margin-bottom: 3vh;
+          background-color: #f6f7f8;
+          padding: 1vh;
+          border-top: none;
+          z-index: 10;
+          display: none;
+          /* max-width: 55vw;*/
+          width: 70vw;
+          max-height: 20vh;
+          overflow: auto;
+          border: 1px solid #5983ac;
+          scrollbar-width: thin;
+        }
+
+        .suggestion {
+          cursor: pointer;
+          border: 1px solid #a6d0f3;
+          background-color: white;
+          padding: 0.7vh;
+          padding-left: 2vh;
+          padding-right: 2vh;
+          border-radius: 1.6vh;
+          margin-bottom: 5px;
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+          width: 55vw;
+          /* margin-right: 5vh;*/
+          font-size: 1.2vh;
+        }
+
+        .suggestion:hover {
+          background-color: #e2eef8;
+        }
+
+        /*Heading*/
+        #tittle {
+          font-size: 1.8vh;
+          color: #7c7c7e;
+        }
+
+        #suggestions-container h2 {
+          position: sticky; /* Make the heading stick to the top of the container */
+          top: 0;
+          background-color: #f6f7f8;
+          z-index: 1;
+          padding: 1vh;
+
+          margin: 0;
+          margin-bottom: 1vh;
+        }
+
+        #see-more {
+          position: absolute;
+          bottom: 1vh;
+          right: 1vw;
+          font-size: 2vw;
+          padding: 0.7vh 0.7vw;
+          cursor: pointer;
+          color: white;
+          background-color: #5983ac;
+          border: none;
+          display: none; /* Hidden initially */
+          z-index: 100;
+        }
+        #see-more:hover {
+          background-color: #4f7599;
+          color: white;
+        }
+      }
+
+      /* Medium devices (landscape tablets, 768px and up) */
+      @media only screen and (min-width: 768px) {
+        .navbar {
+          background-color: #1c3f60;
+          color: white;
+          padding: 3vh;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+
+        .navbar h2 {
+          margin: 0;
+          flex-grow: 1;
+          text-align: center;
+          font-size: 3.2vw;
+        }
+
+        .navbar i {
+          font-size: 2vh;
+          cursor: pointer;
+          color: white;
+          transition: color 0.3s ease;
+          padding: 0.5vh;
+        }
+
+        .navbar i:hover {
+          color: #4275a5;
+        }
+
+        .navbar img {
+          height: 7vw;
+          width: auto;
+          margin-top: -3vh;
+          margin-bottom: -3vh;
+        }
+
+        .token {
+          font-size: 1.2em;
+          display: flex;
+          align-items: center;
+          /*  justify-content: space-between; /* Space between button and text */
+          margin-right: 2vw; /* Optional: Keep space on the right */
+          padding-left: 20px;
+          position: relative;
+        }
+        .token h6 {
+          margin-left: -8px;
+          font-size: 1.8vw;
+        }
+        .login-user {
+          font-size: 1.7vw;
+          position: absolute;
+          left: 75vw;
+          top: 1vh;
+          right: 0;
+        }
+        .userlogo_name {
+          height: 2vh;
+          width: 4vw;
+          position: absolute;
+          top: 2.6vh;
+          left: 70vw;
+        }
+
+        #loading-indicator {
+          font-size: 12px;
+          position: absolute; /* Position it below the button */
+          left: 5;
+          top: 60px;
+          color: #1c3f60;
+          font-style: italic;
+        }
+
+        .content {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          padding-top: 1.5vh;
+          padding-bottom: 1vh;
+          background: white;
+          border-radius: 0.5vh;
+          /*box-shadow: 0 0.2vh 0.5vh rgba(0, 0, 0, 0.1);*/
+          overflow-y: auto;
+          overflow-x: hidden;
+          /*  max-height: 44vh;*/
+          height: 58vh;
+          position: relative;
+        }
+
+        /* Initially hide the loading spinner */
+        .dropdown-blur {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0; /* Adjust this depending on the sidebar width */
+          background-color: rgba(
+            0,
+            0,
+            0,
+            0.5
+          ); /* Semi-transparent background */
+          backdrop-filter: blur(3px);
+          z-index: 10; /* Make sure it's above other content */
+          display: none;
+          transition: all 0.3s ease; /* Smooth transition */
+          justify-content: center;
+          align-items: center;
+        }
+
+        .dropdown-blur img {
+          width: 20vw; /* Adjust the size as per your needs */
+          height: 40vh;
+          object-fit: contain;
+        }
+
+        /* When sidebar is expanded, show the blur effect */
+        #dropdown-menu:not(.collapsed) + .dropdown-blur {
+          display: block; /* Show blur when sidebar is expanded */
+        }
+
+        .message-user {
+          color: white;
+          align-self: flex-end;
+          margin-right: 20vw;
+          margin-left: auto;
+          padding: 0.5vh;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          margin-bottom: 4vh;
+          margin-top: 4vh;
+          position: relative;
+        }
+        .message-bot {
+          /*color: white;*/
+          align-self: flex-start;
+          margin-left: 20vw;
+          margin-right: auto;
+          padding: 1vh;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+        .user-logo .logo-image {
+          width: 3.8vh;
+          height: 3.2vh;
+          /* padding: 0.5vh;
+          padding-bottom: 1vh;
+          margin-left: 1vh;*/
+          position: absolute;
+          top: -0.6vh;
+          right: -4vw;
+          margin-left: 1vh;
+        }
+        .bot-logo .logo-image {
+          width: 4.5vh;
+          height: 4.5vh;
+          /* padding: 0.5vh;*/
+          padding-bottom: 1vh;
+          position: absolute;
+          top: 0.7vh;
+          left: -10vw;
+          /*margin-right: 1vh;*/
+        }
+        .user-logo,
+        .bot-logo {
+          display: flex;
+          align-items: center;
+        }
+
+        .user-message-text {
+          background-color: #c1ccd4;
+          /* border: 0.3vh solid black; #afc3d3*/
+          color: black;
+          padding: 0.2vh;
+          padding-left: 2vh;
+          padding-right: 2vh;
+          border-radius: 1.6vh;
+
+          max-width: 35vw;
+          white-space: pre-wrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: inline-block;
+          word-spacing: 2px;
+          margin-right: 1vw;
+          margin-top: -1vh;
+
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          word-break: normal; /* Break long strings without spaces */
+          text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+          font-size: 1.3vh;
+        }
+        .user-message-paragraph {
+          margin: 0;
+          margin-bottom: 0.5vh;
+          line-height: 1.6;
+        }
+
+        .bot-message-text {
+          background-color: #e2eef8;
+          padding: 0.4vh 2vh;
+          margin-top: 1vh;
+          color: black;
+          margin-left: 5vh;
+          border-radius: 1.6vh;
+          word-spacing: 2px;
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+          max-width: 52vw;
+          overflow-x: auto;
+          font-size: 1.4vh;
+          margin-left: -5vw;
+        }
+        .bot-message-text p {
+          position: relative;
+          word-wrap: break-word;
+          white-space: normal;
+        }
+        .bot-message-text ol {
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+        }
+
+        .bot-message-paragraph {
+          margin: 0;
+          text-wrap: wrap;
+          line-height: 1.6;
+        }
+
+        .bot-message-text img {
+          height: 40vh;
+          width: auto;
+        }
+
+        .copy-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -8px; /* Distance from the bottom */
+          left: -3.5vw; /* Distance from the left */
+          display: flex;
+          align-items: center;
+        }
+
+        .copy-icon {
+          font-size: 1.1vh;
+          color: #000;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+
+        .copy-icon:hover {
+          color: #9d9da0;
+        }
+
+        .tooltip {
+          visibility: hidden;
+          background-color: #555;
+          color: #fff;
+          text-align: center;
+          border-radius: 6px;
+          padding: 5px;
+          position: absolute;
+          z-index: 1;
+          bottom: 125%;
+          left: 50%;
+          margin-left: -60px;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+
+        .copy-container:hover .tooltip {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        .copied-text {
+          font-size: 0.8em;
+          color: #16314b;
+          margin-left: 5px;
+        }
+        .thumbs-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -7px; /* Distance from the bottom */
+          right: 5vw; /* Distance from the left */
+          display: flex;
+          align-items: center;
+        }
+
+        .thumbs-up-icon,
+        .thumbs-down-icon {
+          font-size: 1.2vh;
+          color: #000;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+        .thumbs-down-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -7px; /* Distance from the bottom */
+          right: 3vw;
+          display: flex;
+          align-items: center;
+        }
+        .thumbs-up-icon:hover,
+        .thumbs-down-icon:hover {
+          color: #9d9da0;
+        }
+
+        .Thanks-text {
+          font-size: 0.8em;
+          color: #16314b;
+          margin-bottom: -5vh;
+          margin-left: 4vw;
+          /* display: inline-block; 
+          max-width: 100px; 
+          word-wrap: break-word; 
+          white-space: normal; */
+        }
+        .input-container {
+          display: flex;
+          align-items: center;
+          position: fixed;
+          bottom: 13em;
+          left: 10vw;
+          right: 10vw;
+          /*40VH*/
+        }
+
+        .input-container i {
+          font-size: 1.5vh;
+        }
+        /* input[type="text"] {
+          flex-grow: 1; 
+          padding: 1.1vh;
+          font-size: 2vh;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh; 
+        } */
+
+        textarea {
+          flex-grow: 1;
+          padding: 0.5vh;
+          font-size: 1.3vh;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh;
+          overflow: hidden; /* Prevent scrollbar */
+          resize: none; /* Disable manual resizing */
+          box-sizing: border-box;
+          white-space: pre-wrap; /* Allow wrapping */
+          font-family: Poppins, Helvetica, sans-serif;
+        }
+
+        .image-container {
+          position: relative;
+          width: auto;
+          height: 200px;
+          overflow: hidden;
+        }
+
+        .image-container img {
+          width: auto;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .download-icon {
+          position: absolute;
+          bottom: 85%;
+          left: 90%;
+          font-size: 2vh;
+          color: #fff;
+          background-color: rgba(0, 0, 0, 0.5);
+          border-radius: 50%;
+          transform: translateX(-50%);
+          padding: 1vh;
+          transition: color 0.3s ease;
+        }
+
+        .download-icon:hover {
+          color: #9cbfdf;
+        }
+
+        button {
+          background-color: #1c3f60;
+          color: white;
+          border: none;
+          border-radius: 1vh;
+          padding: 1.2vw 1.2vw;
+          font-size: 1.2vw;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-right: 10px;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+        }
+
+        .typing-indicator {
+          color: #1c3f60;
+          font-style: italic;
+          margin-left: 0vw;
+          margin-top: 0vh;
+          font-size: 1.5vh;
+        }
+        .typing-indicator-container {
+          display: flex; /* Use flexbox for alignment */
+          align-items: center; /* Center vertically */
+        }
+
+        .botlogo {
+          margin-left: 10vw;
+        }
+
+        /*margin-right: 1vh;*/
+        .logoimage {
+          width: 4.5vh;
+          height: 5vh;
+          /* padding: 0.5vh;*/
+          /* padding-bottom: 1vh;*/
+        }
+
+        footer {
+          color: #1c3f60;
+          text-align: center;
+          position: fixed;
+          bottom: 10em;
+          left: 0;
+          right: 0;
+          font-size: 2vw;
+          font-style: italic;
+          padding: 1vh 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse; /* Ensures that the borders are collapsed */
+          margin: 10px 0;
+        }
+
+        table th,
+        table td {
+          border: 1px solid black; /* Add a light gray border */
+          padding: 8px; /* Padding for cells */
+          text-align: left; /* Align text to the left */
+          background-color: white;
+        }
+
+        table th {
+          background-color: #1c3f60;
+          color: white;
+        }
+        #report-button:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
+        #report-button:disabled:hover {
+          background-color: grey;
+          cursor: not-allowed;
+        }
+
+        .dropdown-item:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+        .dropdown-item:disabled:hover {
+          background-color: grey;
+          cursor: not-allowed;
+        }
+
+        /*  #suggestions-container {
+          position: absolute;
+          /*top:70vh;
+          bottom: 13vh;
+          left: 20vw;
+          margin-bottom: 2vh;
+          background-color: #f6f7f8;
+          padding: 1vh;
+  
+          border-top: none;
+          z-index: 10;
+          display: none;
+          max-width: 55vw;
+          max-height: 20vh;
+          overflow: auto;
+          border: 1px solid #5983ac;
+          scrollbar-width: thin;
+        }*/
+
+        #suggestions-container {
+          position: fixed;
+          /*  top: 70vh;*/
+          /* bottom: 13vh;*/
+          /*  bottom: 8em;*/
+          left: 10vw;
+          margin-bottom: 15vh;
+          background-color: #f6f7f8;
+          padding: 1vh;
+          border-top: none;
+          z-index: 10;
+          display: none;
+          /* max-width: 55vw;*/
+          width: 70vw;
+          max-height: 20vh;
+          overflow: auto;
+          border: 1px solid #5983ac;
+          scrollbar-width: thin;
+        }
+
+        .suggestion {
+          cursor: pointer;
+          border: 1px solid #a6d0f3;
+          background-color: white;
+          padding: 0.7vh;
+          padding-left: 2vh;
+          padding-right: 2vh;
+          border-radius: 1.6vh;
+          margin-bottom: 5px;
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+          width: 55vw;
+          /* margin-right: 5vh;*/
+          font-size: 1.2vh;
+        }
+
+        .suggestion:hover {
+          background-color: #e2eef8;
+        }
+
+        /*Heading*/
+        #tittle {
+          font-size: 1.8vh;
+          color: #7c7c7e;
+        }
+
+        #suggestions-container h2 {
+          position: sticky; /* Make the heading stick to the top of the container */
+          top: 0;
+          background-color: #f6f7f8;
+          z-index: 1;
+          padding: 1vh;
+
+          margin: 0;
+          margin-bottom: 1vh;
+        }
+
+        #see-more {
+          position: absolute;
+          bottom: 1vh;
+          right: 1vw;
+          font-size: 2vw;
+          padding: 0.7vh 0.7vw;
+          cursor: pointer;
+          color: white;
+          background-color: #5983ac;
+          border: none;
+          display: none; /* Hidden initially */
+          z-index: 100;
+        }
+        #see-more:hover {
+          background-color: #4f7599;
+          color: white;
+        }
+      }
+
+      /* Large devices (laptops/desktops, 992px and up) */
+      @media only screen and (min-width: 992px) {
+        .navbar {
+          background-color: #1c3f60;
+          color: white;
+          padding: 3vh;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+
+        .navbar h2 {
+          margin: 0;
+          flex-grow: 1;
+          text-align: center;
+          font-size: 2.7vw;
+        }
+
+        .navbar i {
+          font-size: 1.8vh;
+          cursor: pointer;
+          color: white;
+          transition: color 0.3s ease;
+          padding: 0.5vh;
+        }
+
+        .navbar i:hover {
+          color: #4275a5;
+        }
+
+        .navbar img {
+          height: 7vw;
+          width: auto;
+          margin-top: -3vh;
+          margin-bottom: -3vh;
+        }
+
+        .token {
+          font-size: 1.2em;
+          display: flex;
+          align-items: center;
+          /*  justify-content: space-between; /* Space between button and text */
+          margin-right: 2vw; /* Optional: Keep space on the right */
+          padding-left: 20px;
+          position: relative;
+        }
+        .token h6 {
+          margin-left: -8px;
+          font-size: 1.5vw;
+        }
+        .login-user {
+          font-size: 1.4vw;
+          position: absolute;
+          left: 75vw;
+          top: 1vh;
+          right: 0;
+        }
+        .userlogo_name {
+          height: 2vh;
+          width: 4vw;
+          position: absolute;
+          top: 2.2vh;
+          left: 70vw;
+        }
+
+        #loading-indicator {
+          font-size: 12px;
+          position: absolute; /* Position it below the button */
+          left: 5;
+          top: 60px;
+          color: #1c3f60;
+          font-style: italic;
+        }
+
+        .content {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          padding-top: 1.5vh;
+          padding-bottom: 1vh;
+          background: white;
+          border-radius: 0.5vh;
+          /*box-shadow: 0 0.2vh 0.5vh rgba(0, 0, 0, 0.1);*/
+          overflow-y: auto;
+          overflow-x: hidden;
+          /*  max-height: 44vh;*/
+          height: 58vh;
+          position: relative;
+        }
+
+        /* Initially hide the loading spinner */
+        .dropdown-blur {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0; /* Adjust this depending on the sidebar width */
+          background-color: rgba(
+            0,
+            0,
+            0,
+            0.5
+          ); /* Semi-transparent background */
+          backdrop-filter: blur(3px);
+          z-index: 10; /* Make sure it's above other content */
+          display: none;
+          transition: all 0.3s ease; /* Smooth transition */
+          justify-content: center;
+          align-items: center;
+        }
+
+        .dropdown-blur img {
+          width: 20vw; /* Adjust the size as per your needs */
+          height: 40vh;
+          object-fit: contain;
+        }
+
+        /* When sidebar is expanded, show the blur effect */
+        #dropdown-menu:not(.collapsed) + .dropdown-blur {
+          display: block; /* Show blur when sidebar is expanded */
+        }
+
+        .message-user {
+          color: white;
+          align-self: flex-end;
+          margin-right: 20vw;
+          margin-left: auto;
+          padding: 0.5vh;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          margin-bottom: 4vh;
+          margin-top: 4vh;
+          position: relative;
+        }
+        .message-bot {
+          /*color: white;*/
+          align-self: flex-start;
+          margin-left: 20vw;
+          margin-right: auto;
+          padding: 1vh;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+        .user-logo .logo-image {
+          width: 3.5vh;
+          height: 3vh;
+          /* padding: 0.5vh;
+          padding-bottom: 1vh;
+          margin-left: 1vh;*/
+          position: absolute;
+          top: -0.6vh;
+          right: -4vw;
+          margin-left: 1vh;
+        }
+        .bot-logo .logo-image {
+          width: 4.5vh;
+          height: 4.5vh;
+          /* padding: 0.5vh;*/
+          padding-bottom: 1vh;
+          position: absolute;
+          top: 0.7vh;
+          left: -10vw;
+          /*margin-right: 1vh;*/
+        }
+        .user-logo,
+        .bot-logo {
+          display: flex;
+          align-items: center;
+        }
+
+        .user-message-text {
+          background-color: #c1ccd4;
+          /* border: 0.3vh solid black; #afc3d3*/
+          color: black;
+          padding: 0.2vh;
+          padding-left: 2vh;
+          padding-right: 2vh;
+          border-radius: 1.6vh;
+
+          max-width: 35vw;
+          white-space: pre-wrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: inline-block;
+          word-spacing: 2px;
+          margin-right: 1vw;
+          margin-top: -1vh;
+
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          word-break: normal; /* Break long strings without spaces */
+          text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+          font-size: 1.1vh;
+        }
+        .user-message-paragraph {
+          margin: 0;
+          margin-bottom: 0.5vh;
+          line-height: 1.6;
+        }
+
+        .bot-message-text {
+          background-color: #e2eef8;
+          padding: 0.4vh 2vh;
+          margin-top: 1vh;
+          color: black;
+          margin-left: 5vh;
+          border-radius: 1.6vh;
+          word-spacing: 2px;
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+          max-width: 52vw;
+          overflow-x: auto;
+          font-size: 1.1vh;
+          margin-left: -5vw;
+        }
+        .bot-message-text p {
+          position: relative;
+          word-wrap: break-word;
+          white-space: normal;
+        }
+        .bot-message-text ol {
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+        }
+
+        .bot-message-paragraph {
+          margin: 0;
+          text-wrap: wrap;
+          line-height: 1.6;
+        }
+
+        .bot-message-text img {
+          height: 40vh;
+          width: auto;
+        }
+
+        .copy-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -8px; /* Distance from the bottom */
+          left: -3.5vw; /* Distance from the left */
+          display: flex;
+          align-items: center;
+        }
+
+        .copy-icon {
+          font-size: 1.1vh;
+          color: #000;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+
+        .copy-icon:hover {
+          color: #9d9da0;
+        }
+
+        .tooltip {
+          visibility: hidden;
+          background-color: #555;
+          color: #fff;
+          text-align: center;
+          border-radius: 6px;
+          padding: 5px;
+          position: absolute;
+          z-index: 1;
+          bottom: 125%;
+          left: 50%;
+          margin-left: -60px;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+
+        .copy-container:hover .tooltip {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        .copied-text {
+          font-size: 0.8em;
+          color: #16314b;
+          margin-left: 5px;
+        }
+        .thumbs-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -7px; /* Distance from the bottom */
+          right: 5vw; /* Distance from the left */
+          display: flex;
+          align-items: center;
+        }
+
+        .thumbs-up-icon,
+        .thumbs-down-icon {
+          font-size: 1.2vh;
+          color: #000;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+        .thumbs-down-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -7px; /* Distance from the bottom */
+          right: 3vw;
+          display: flex;
+          align-items: center;
+        }
+        .thumbs-up-icon:hover,
+        .thumbs-down-icon:hover {
+          color: #9d9da0;
+        }
+
+        .Thanks-text {
+          font-size: 0.8em;
+          color: #16314b;
+          margin-bottom: -5vh;
+          margin-left: 4vw;
+          /* display: inline-block; 
+          max-width: 100px; 
+          word-wrap: break-word; 
+          white-space: normal; */
+        }
+        .input-container {
+          display: flex;
+          align-items: center;
+          position: fixed;
+          bottom: 33em;
+          left: 10vw;
+          right: 10vw;
+          /*40VH*/
+        }
+
+        .input-container i {
+          font-size: 1.5vh;
+        }
+        /* input[type="text"] {
+          flex-grow: 1; 
+          padding: 1.1vh;
+          font-size: 2vh;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh; 
+        } */
+
+        textarea {
+          flex-grow: 1;
+          padding: 0.5vh;
+          font-size: 1.1vh;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh;
+          overflow: hidden; /* Prevent scrollbar */
+          resize: none; /* Disable manual resizing */
+          box-sizing: border-box;
+          white-space: pre-wrap; /* Allow wrapping */
+          font-family: Poppins, Helvetica, sans-serif;
+        }
+
+        .image-container {
+          position: relative;
+          width: auto;
+          height: 300px;
+          overflow: hidden;
+        }
+
+        .image-container img {
+          width: auto;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .download-icon {
+          position: absolute;
+          bottom: 85%;
+          left: 90%;
+          font-size: 0.8vh;
+          color: #fff;
+          background-color: rgba(0, 0, 0, 0.5);
+          border-radius: 50%;
+          transform: translateX(-50%);
+          padding: 0.8vh;
+          transition: color 0.3s ease;
+        }
+
+        .download-icon:hover {
+          color: #9cbfdf;
+        }
+
+        button {
+          background-color: #1c3f60;
+          color: white;
+          border: none;
+          border-radius: 1vh;
+          padding: 1.2vw 1.2vw;
+          font-size: 1.2vw;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-right: 10px;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+        }
+
+        .typing-indicator {
+          color: #1c3f60;
+          font-style: italic;
+          margin-left: 0vw;
+          margin-top: 0vh;
+          font-size: 1.5vh;
+        }
+        .typing-indicator-container {
+          display: flex; /* Use flexbox for alignment */
+          align-items: center; /* Center vertically */
+        }
+
+        .botlogo {
+          margin-left: 10vw;
+        }
+
+        /*margin-right: 1vh;*/
+        .logoimage {
+          width: 4.5vh;
+          height: 5vh;
+          /* padding: 0.5vh;*/
+          /* padding-bottom: 1vh;*/
+        }
+
+        footer {
+          color: #1c3f60;
+          text-align: center;
+          position: fixed;
+          bottom: 10em;
+          left: 0;
+          right: 0;
+          font-size: 2vw;
+          font-style: italic;
+          padding: 1vh 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse; /* Ensures that the borders are collapsed */
+          margin: 10px 0;
+        }
+
+        table th,
+        table td {
+          border: 1px solid black; /* Add a light gray border */
+          padding: 8px; /* Padding for cells */
+          text-align: left; /* Align text to the left */
+          background-color: white;
+        }
+
+        table th {
+          background-color: #1c3f60;
+          color: white;
+        }
+        #report-button:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
+        #report-button:disabled:hover {
+          background-color: grey;
+          cursor: not-allowed;
+        }
+
+        .dropdown-item:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+        .dropdown-item:disabled:hover {
+          background-color: grey;
+          cursor: not-allowed;
+        }
+
+        /*  #suggestions-container {
+          position: absolute;
+          /*top:70vh;
+          bottom: 13vh;
+          left: 20vw;
+          margin-bottom: 2vh;
+          background-color: #f6f7f8;
+          padding: 1vh;
+  
+          border-top: none;
+          z-index: 10;
+          display: none;
+          max-width: 55vw;
+          max-height: 20vh;
+          overflow: auto;
+          border: 1px solid #5983ac;
+          scrollbar-width: thin;
+        }*/
+
+        #suggestions-container {
+          position: fixed;
+          /*  top: 70vh;*/
+          /* bottom: 13vh;*/
+          /*  bottom: 8em;*/
+          left: 10vw;
+          margin-bottom: 35vh;
+          background-color: #f6f7f8;
+          padding: 1vh;
+          border-top: none;
+          z-index: 10;
+          display: none;
+          /* max-width: 55vw;*/
+          width: 70vw;
+          max-height: 20vh;
+          overflow: auto;
+          border: 1px solid #5983ac;
+          scrollbar-width: thin;
+        }
+
+        .suggestion {
+          cursor: pointer;
+          border: 1px solid #a6d0f3;
+          background-color: white;
+          padding: 0.7vh;
+          padding-left: 2vh;
+          padding-right: 2vh;
+          border-radius: 1.6vh;
+          margin-bottom: 5px;
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+          width: 55vw;
+          /* margin-right: 5vh;*/
+          font-size: 1vh;
+        }
+
+        .suggestion:hover {
+          background-color: #e2eef8;
+        }
+
+        /*Heading*/
+        #tittle {
+          font-size: 1.8vh;
+          color: #7c7c7e;
+        }
+
+        #suggestions-container h2 {
+          position: sticky; /* Make the heading stick to the top of the container */
+          top: 0;
+          background-color: #f6f7f8;
+          z-index: 1;
+          padding: 1vh;
+
+          margin: 0;
+          margin-bottom: 1vh;
+        }
+
+        #see-more {
+          position: absolute;
+          bottom: 1vh;
+          right: 1vw;
+          font-size: 2vw;
+          padding: 0.7vh 0.7vw;
+          cursor: pointer;
+          color: white;
+          background-color: #5983ac;
+          border: none;
+          display: none; /* Hidden initially */
+          z-index: 100;
+        }
+        #see-more:hover {
+          background-color: #4f7599;
+          color: white;
+        }
+      }
+
+      /* Extra large devices (large laptops and desktops, 1200px and up) */
+      @media only screen and (min-width: 1200px) {
+        .navbar {
+          background-color: #1c3f60;
+          color: white;
+          padding: 3vh;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+
+        .navbar h2 {
+          margin: 0;
+          flex-grow: 1;
+          text-align: center;
+          font-size: 3vh;
+        }
+
+        .navbar i {
+          font-size: 2.8vh;
+          cursor: pointer;
+          color: white;
+          transition: color 0.3s ease;
+          padding: 0.5vh;
+        }
+
+        .navbar i:hover {
+          color: #4275a5;
+        }
+
+        .navbar img {
+          height: 5vw;
+          width: auto;
+          margin-top: -3vh;
+          margin-bottom: -3vh;
+        }
+        #dropdown-menu {
+          position: fixed;
+          top: 0;
+          left: 0;
+          background-color: rgb(236, 234, 234);
+          /*box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);*/
+          z-index: 1;
+
+          height: 100%;
+          width: 25%;
+
+          overflow: auto;
+          transition: all 0.3s ease;
+        }
+
+        #dropdown-menu.collapsed {
+          width: 1.5vw;
+          background-color: transparent;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        #dropdown-menu h3 {
+          text-align: center;
+          margin-top: 7vh;
+          color: #16314b;
+        }
+        #dropdown-menu.collapsed h3 {
+          display: none;
+        }
+        #dropdown-menu button {
+          display: block;
+          padding: 12px;
+          background-color: #1c3f60;
+          font-size: 20px;
+          color: white;
+          text-decoration: none;
+          transition: background-color 0.3s ease;
+          width: 20vw;
+          margin: 0.5vh 2vw;
+          border-radius: 10px;
+          text-align: center;
+          font-family: Poppins, Helvetica, sans-serif;
+        }
+        #dropdown-menu button:hover {
+          background-color: #2980b9;
+        }
+
+        /* Sidebar icon only when collapsed */
+        #dropdown-menu.collapsed button {
+          display: none;
+        }
+
+        /* Make sure the toggle icon is always visible in collapsed state */
+        #dropdown-menu i {
+          display: none; /* Initially hide */
+        }
+
+        #dropdown-menu.collapsed i {
+          width: 5vw; /* Adjust based on your icon size */
+          height: 7vh; /* Adjust based on your icon size */
+          background-color: #1c3f60; /* Icon background color */
+          color: white;
+          /* Optional: if your icon is circular */
+          border-top-right-radius: 25px;
+          border-bottom-right-radius: 25px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        #dropdown-menu i:hover {
+          background-color: #2980b9;
+        }
+        #close-sidebar {
+          position: absolute;
+          top: 2vh; /* Adjust as needed */
+          right: 2vw; /* Adjust as needed */
+          font-size: 24px;
+          color: #1c3f60;
+
+          cursor: pointer;
+          display: none; /* Hide the close button initially */
+        }
+
+        /* preview page*/
+        /* preview page */
+        .preview h3 {
+          text-align: center;
+          font-size: 1vw;
+        }
+        .preview {
+          position: fixed;
+          top: 0;
+          right: -300px; /* Initially hide the sidebar off-screen */
+          background-color: rgb(236, 234, 234);
+          width: 300px;
+
+          overflow: auto;
+          transition: all 0.3s ease;
+          z-index: 1;
+        }
+
+        /* Sidebar when expanded */
+        .preview.expanded {
+          right: 0; /* Move the sidebar into view */
+          width: 100%;
+        }
+
+        /* Toggle button (on the right side when collapsed) */
+        #toggle-rightbar {
+          position: fixed;
+          top: 40%;
+          right: 10px;
+          font-size: 24px;
+          cursor: pointer;
+          color: white;
+          background-color: #16314b;
+          z-index: 2;
+          border-top-left-radius: 25px;
+          border-bottom-left-radius: 25px;
+          padding: 8vh 0.5vw;
+        }
+
+        /* Ensure the toggle-rightbar is visible even when sidebar is collapsed */
+        .preview.collapsed #toggle-rightbar {
+          display: block;
+        }
+
+        /* Close button (inside the sidebar) */
+        #close-rightbar {
+          position: absolute;
+          top: 20px;
+          right: 50px;
+          font-size: 30px;
+          cursor: pointer;
+          color: black;
+          display: none; /* Initially hide close button */
+        }
+
+        /* When the sidebar is expanded, show the close button */
+        .preview.expanded #close-rightbar {
+          display: block;
+        }
+
+        /* Ensure that when sidebar is collapsed, it remains small */
+        .preview.collapsed {
+          right: -300px; /* Off-screen when collapsed */
+        }
+        #preview-container {
+          /* overflow-y: auto;
+          overflow-x: auto;*/
+          /* Full height of the sidebar */
+          overflow-y: auto; /* Enable vertical scrolling */
+          overflow-x: auto;
+          max-height: calc(
+            100vh - 10vh
+          ); /* Adjust based on navbar and footer height */
+          position: relative; /* For positioning */
+          z-index: 0;
+          margin-left: 1vw;
+        }
+
+        #preview-container img {
+          width: 100%; /* Adjust image size based on your requirements */
+          height: auto;
+        }
+
+        #preview-container table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-left: 1vw;
+        }
+
+        #preview-container th,
+        #preview-container td {
+          border: 1px solid #1c3f60;
+          padding: 4px;
+          text-align: left;
+        }
+        #preview-container th {
+          background-color: #1c3f60;
+          color: white;
+          position: sticky; /* Make the header sticky */
+          top: 0; /* Stick to the top of the container */
+          z-index: 1; /* Ensure it is above other content */
+          font-weight: normal;
+          border-right: 1.5px solid white;
+          padding: 5px 15px;
+        }
+        #preview-container td {
+          border: 1px solid #1c3f60;
+        }
+        .tab-button {
+          background-color: #1c3f60;
+          color: white;
+          border: none;
+          border-radius: 1vh;
+          padding: 0.5vw 1vw;
+          font-size: 1vw;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-left: 40px;
+        }
+
+        /*----------------------------------------------*/
+
+        .content {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          padding-top: 1.5vh;
+          padding-bottom: 1vh;
+          background: white;
+          border-radius: 0.5vh;
+          /*box-shadow: 0 0.2vh 0.5vh rgba(0, 0, 0, 0.1);*/
+          overflow-y: auto;
+          overflow-x: hidden;
+          /*  max-height: 44vh;*/
+          height: 58vh;
+          position: relative;
+        }
+
+        /* Initially hide the loading spinner */
+        .dropdown-blur {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          left: 0; /* Adjust this depending on the sidebar width */
+          background-color: rgba(
+            0,
+            0,
+            0,
+            0.5
+          ); /* Semi-transparent background */
+          backdrop-filter: blur(3px);
+          z-index: 10; /* Make sure it's above other content */
+          display: none;
+          transition: all 0.3s ease; /* Smooth transition */
+          justify-content: center;
+          align-items: center;
+        }
+
+        .dropdown-blur img {
+          width: 20vw; /* Adjust the size as per your needs */
+          height: 40vh;
+          object-fit: contain;
+        }
+
+        /* When sidebar is expanded, show the blur effect */
+        #dropdown-menu:not(.collapsed) + .dropdown-blur {
+          display: block; /* Show blur when sidebar is expanded */
+        }
+
+        .token {
+          font-size: 1.2em;
+          display: flex;
+          align-items: center;
+          /*  justify-content: space-between; /* Space between button and text */
+          margin-right: 2vw; /* Optional: Keep space on the right */
+          padding-left: 20px;
+          position: relative;
+        }
+        .token h6 {
+          margin-left: 20px;
+          font-size: 0.8vw;
+        }
+        .login-user {
+          font-size: 0.8vw;
+          position: absolute;
+          left: 90.2vw;
+          top: 1vh;
+          right: 0;
+        }
+        .userlogo_name {
+          height: 3vh;
+          width: 2.2vw;
+          position: absolute;
+          top: 3vh;
+          left: 87.5vw;
+        }
+
+        #loading-indicator {
+          font-size: 12px;
+          position: absolute; /* Position it below the button */
+          left: 5;
+          top: 60px;
+          color: #1c3f60;
+          font-style: italic;
+        }
+
+        .message-user {
+          color: white;
+          align-self: flex-end;
+          margin-right: 20vw;
+          margin-left: auto;
+          padding: 0.5vh;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          margin-bottom: 4vh;
+          margin-top: 4vh;
+          position: relative;
+        }
+        .message-bot {
+          /*color: white;*/
+          align-self: flex-start;
+          margin-left: 20vw;
+          margin-right: auto;
+          padding: 1vh;
+          display: flex;
+          align-items: center;
+          position: relative;
+        }
+        .user-logo .logo-image {
+          width: 5.5vh;
+          height: 4.5vh;
+          /* padding: 0.5vh;*/
+          padding-bottom: 1vh;
+          margin-left: 1vh;
+          position: absolute;
+          top: 0;
+          right: 0;
+          margin-left: 1vh;
+        }
+        .bot-logo .logo-image {
+          width: 6vh;
+          height: 7vh;
+          /* padding: 0.5vh;*/
+          padding-bottom: 1vh;
+          position: absolute;
+          top: 0;
+          left: 0;
+          margin-right: 1vh;
+        }
+        .user-logo,
+        .bot-logo {
+          display: flex;
+          align-items: center;
+        }
+
+        .user-message-text {
+          background-color: #c1ccd4;
+          /* border: 0.3vh solid black; #afc3d3*/
+          color: black;
+          padding: 0.8vh;
+          padding-left: 2vh;
+          padding-right: 2vh;
+          border-radius: 1.6vh;
+
+          max-width: 35vw;
+          white-space: pre-wrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: inline-block;
+          word-spacing: 2px;
+          margin-right: 5vh;
+          margin-top: -0.5vh;
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          word-break: normal; /* Break long strings without spaces */
+          text-overflow: ellipsis; /* Add ellipsis for overflowing text */
+          font-size: 1.8vh;
+        }
+        .user-message-paragraph {
+          margin: 0;
+          margin-bottom: 0.5vh;
+          line-height: 1.6;
+        }
+        /* .bot-message-text {
+          background-color: #e2eef8;
+          padding: 0.8vh;
+          padding-left: 2vh;
+    padding-right: 2vh;
+    margin-top: 1vh;
+    color: black;
+    margin-left: 5vh;
+    border-radius: 1.6vh;
+   
+    max-width: 68%;
+    word-spacing: 2px;
+    position: relative;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    display: inline-block; 
+    width: auto;
+          
+        }*/
+
+        .bot-message-text {
+          background-color: #e2eef8;
+          padding: 0.8vh 2vh;
+          margin-top: 1vh;
+          color: black;
+          margin-left: 5vh;
+          border-radius: 1.6vh;
+          word-spacing: 2px;
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+          max-width: 52vw;
+          overflow-x: auto;
+          font-size: 1.8vh;
+          /* Keep flex for layout control */
+        }
+        .bot-message-text p {
+          position: relative;
+          word-wrap: break-word;
+          white-space: normal;
+        }
+        .bot-message-text ol {
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+        }
+
+        .bot-message-paragraph {
+          margin: 0;
+          text-wrap: wrap;
+          line-height: 1.6;
+        }
+
+        .bot-message-text img {
+          height: 40vh;
+          width: auto;
+        }
+
+        .copy-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -10px; /* Distance from the bottom */
+          left: 6vh; /* Distance from the left */
+          display: flex;
+          align-items: center;
+        }
+
+        .copy-icon {
+          font-size: 1.6vh;
+          color: #000;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+
+        .copy-icon:hover {
+          color: #9d9da0;
+        }
+
+        .tooltip {
+          visibility: hidden;
+          background-color: #555;
+          color: #fff;
+          text-align: center;
+          border-radius: 6px;
+          padding: 5px;
+          position: absolute;
+          z-index: 1;
+          bottom: 125%;
+          left: 50%;
+          margin-left: -60px;
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+
+        .copy-container:hover .tooltip {
+          visibility: visible;
+          opacity: 1;
+        }
+
+        .copied-text {
+          font-size: 0.8em;
+          color: #16314b;
+          margin-left: 5px;
+        }
+        .thumbs-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -10px; /* Distance from the bottom */
+          right: 2vw; /* Distance from the left */
+          display: flex;
+          align-items: center;
+        }
+
+        .thumbs-up-icon,
+        .thumbs-down-icon {
+          font-size: 1.6vh;
+          color: #000;
+          cursor: pointer;
+          transition: color 0.3s ease;
+        }
+        .thumbs-down-container {
+          position: absolute; /* Absolutely positioned within the bot message container */
+          bottom: -10px; /* Distance from the bottom */
+          right: 1vw;
+          display: flex;
+          align-items: center;
+        }
+        .thumbs-up-icon:hover,
+        .thumbs-down-icon:hover {
+          color: #9d9da0;
+        }
+
+        .Thanks-text {
+          font-size: 0.8em;
+          color: #16314b;
+          margin-bottom: -5vh;
+          margin-left: 4vw;
+          /* display: inline-block; 
+          max-width: 100px; 
+          word-wrap: break-word; 
+          white-space: normal; */
+        }
+        .input-container {
+          display: flex;
+          align-items: center;
+          position: fixed;
+          bottom: 4em;
+          left: 20vw;
+          right: 20vw;
+          /*40VH*/
+        }
+
+        .input-container i {
+          font-size: 2vh;
+        }
+        /* input[type="text"] {
+          flex-grow: 1; 
+          padding: 1.1vh;
+          font-size: 2vh;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh; 
+        } */
+
+        textarea {
+          flex-grow: 1;
+          padding: 1.1vh;
+          font-size: 0.8vw;
+          border-radius: 1vh;
+          border: 0.3vh solid #ccc;
+          margin-right: 1vh;
+          overflow: hidden; /* Prevent scrollbar */
+          resize: none; /* Disable manual resizing */
+          box-sizing: border-box;
+          white-space: pre-wrap; /* Allow wrapping */
+          font-family: Poppins, Helvetica, sans-serif;
+        }
+
+        .image-container {
+          position: relative;
+          width: auto;
+          height: 300px;
+          overflow: hidden;
+        }
+
+        .image-container img {
+          width: auto;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .download-icon {
+          position: absolute;
+          bottom: 85%;
+          left: 90%;
+          font-size: 2vh;
+          color: #fff;
+          background-color: rgba(0, 0, 0, 0.5);
+          border-radius: 50%;
+          transform: translateX(-50%);
+          padding: 1vh;
+          transition: color 0.3s ease;
+        }
+
+        .download-icon:hover {
+          color: #9cbfdf;
+        }
+
+        button {
+          background-color: #1c3f60;
+          color: white;
+          border: none;
+          border-radius: 1vh;
+          padding: 0.5vw 1vw;
+          font-size: 1.2vw;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          margin-right: 10px;
+        }
+
+        button:hover {
+          background-color: #2980b9;
+        }
+        .typing-indicator {
+          color: #1c3f60;
+          font-style: italic;
+          margin-left: 0.5vw;
+          margin-top: 1vh;
+          font-size: 1em;
+        }
+        .typing-indicator-container {
+          display: flex; /* Use flexbox for alignment */
+          align-items: center; /* Center vertically */
+        }
+
+        .botlogo {
+          margin-left: 20vw;
+        }
+        .logoimage {
+          width: 6vh;
+          height: 7vh;
+          /* padding: 0.5vh;*/
+          padding-bottom: 1vh;
+        }
+
+        footer {
+          color: #1c3f60;
+          text-align: center;
+          position: fixed;
+          bottom: 1em;
+          left: 0;
+          right: 0;
+          font-size: 0.8vw;
+          font-style: italic;
+          padding: 1vh 0;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse; /* Ensures that the borders are collapsed */
+          margin: 10px 0;
+        }
+
+        table th,
+        table td {
+          border: 1px solid black; /* Add a light gray border */
+          padding: 8px; /* Padding for cells */
+          text-align: left; /* Align text to the left */
+          background-color: white;
+        }
+
+        table th {
+          background-color: #1c3f60;
+          color: white;
+        }
+        #report-button:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+
+        #report-button:disabled:hover {
+          background-color: grey;
+          cursor: not-allowed;
+        }
+
+        .dropdown-item:disabled {
+          cursor: not-allowed;
+          opacity: 0.6;
+        }
+        .dropdown-item:disabled:hover {
+          background-color: grey;
+          cursor: not-allowed;
+        }
+
+        /*  #suggestions-container {
+          position: absolute;
+          /*top:70vh;
+          bottom: 13vh;
+          left: 20vw;
+          margin-bottom: 2vh;
+          background-color: #f6f7f8;
+          padding: 1vh;
+  
+          border-top: none;
+          z-index: 10;
+          display: none;
+          max-width: 55vw;
+          max-height: 20vh;
+          overflow: auto;
+          border: 1px solid #5983ac;
+          scrollbar-width: thin;
+        }*/
+
+        #suggestions-container {
+          position: fixed;
+          /*  top: 70vh;*/
+          /* bottom: 13vh;*/
+          /*  bottom: 8em;*/
+          left: 20vw;
+          margin-bottom: 1vh;
+          background-color: #f6f7f8;
+          padding: 1vh;
+          border-top: none;
+          z-index: 10;
+          display: none;
+          /* max-width: 55vw;*/
+          width: 55vw;
+          max-height: 20vh;
+          overflow: auto;
+          border: 1px solid #5983ac;
+          scrollbar-width: thin;
+        }
+
+        .suggestion {
+          cursor: pointer;
+          border: 1px solid #a6d0f3;
+          background-color: white;
+          padding: 0.7vh;
+          padding-left: 2vh;
+          padding-right: 2vh;
+          border-radius: 1.6vh;
+          margin-bottom: 5px;
+          position: relative;
+          word-wrap: break-word;
+          display: inline-block;
+          white-space: normal;
+          width: 45vw;
+          /* margin-right: 5vh;*/
+          font-size: 0.8vw;
+        }
+
+        .suggestion:hover {
+          background-color: #e2eef8;
+        }
+
+        /*Heading*/
+        #tittle {
+          font-size: 2vh;
+          color: #7c7c7e;
+        }
+
+        #suggestions-container h2 {
+          position: sticky; /* Make the heading stick to the top of the container */
+          top: 0;
+          background-color: #f6f7f8;
+          z-index: 1;
+          padding: 1vh;
+
+          margin: 0;
+          margin-bottom: 1vh;
+        }
+
+        #see-more {
+          position: absolute;
+          bottom: 1vh;
+          right: 1vw;
+          font-size: 0.7vw;
+          padding: 1vh 1vw;
+          cursor: pointer;
+          color: white;
+          background-color: #5983ac;
+          border: none;
+          display: none; /* Hidden initially */
+          z-index: 100;
+        }
+        #see-more:hover {
+          background-color: #4f7599;
+          color: white;
+        }
+      }
+
+      /*   @media (max-width: 1400px) {
+        .navbar h2 {
+          font-size: 2.5vh;
+        }
+        .navbar i {
+          font-size: 2.6vh;
+        }
+        .bot-message-text {
+          font-size: 1.2vw;
+        }
+        .user-message-text {
+          font-size: 1.2vw;
+        }
+      }
+      For very large screens (e.g., desktops with high resolution) 
+      @media (min-width: 1501px) {
+        .bot-message-text {
+          max-width: 45vw;
+        }
+      }
+      @media (min-width: 1600px) and (max-width: 1670px) {
+        .bot-message-text {
+          max-width: 51vw;
+        }
+      }
+      @media (min-height: 1070px) and (max-height: 1100px) {
+        .bot-message-text {
+          max-width: 51vw;
+        }
+      }
+
+      /* For small laptops and tablets (up to 1200px) 
+      /* For medium-sized screens (e.g., laptops) 
+      @media (max-width: 1200px) {
+        .bot-message-text
+          max-width: 34vw; /* Increase the max width for medium-sized screens 
+        }
+      }
+
+      /* For larger laptops (1201px to 1400px) 
+      @media (min-width: 1201px) and (max-width: 1300px) {
+        .bot-message-text {
+          max-width: 45vw; /* Adjusted for larger screens 
+        }
+      }
+
+      @media (min-width: 1301px) and (max-width: 1400px) {
+        .bot-message-text {
+          max-width: 51vw;
+        }
+      }
+
+      /* For desktops (1401px to 1500px) 
+      @media (min-width: 1401px) and (max-width: 1500px) {
+        .bot-message-text {
+          max-width: 45vw;
+        }
+      }*/
+    </style>
+  </head>
+
+  <body>
+    <div class="nav-wrapper" id="nav-wrapper">
+      <div class="navbar">
+        <!-- <i class="fas fa-bars" id="menu-icon"></i> -->
+        <a href="#" id="download-icon">
+          <i class="fa-solid fa-file-arrow-down"></i
+        ></a>
+        <a href="#"> <i class="fas fa-th-list"></i></a>
+
+        <a href="./newUpload"><i class="fa-regular fa-pen-to-square"></i></a>
+        <h2>Punch Point</h2>
+        <img src="./static/images/LTEH Logo.png" alt="Logo" class="logo" />
+      </div>
+    </div>
+
+    <!-- <div class="dropdown" id="dropdown-menu">
+      <i id="toggle-sidebar" class="fa-solid fa-angle-right"></i> -->
+
+    <!-- Close Button (cross icon) -->
+    <!-- <i id="close-sidebar" class="fa-solid fa-xmark" style="display: none"></i>
+
+      <h3>Select the Dataset</h3>
+
+      <button class="dropdown-item" onclick="loadData('Sheet1')">ODC</button> -->
+    <!-- <button class="dropdown-item" onclick="loadData('GC')">GC</button>
+      <button class="dropdown-item" onclick="loadData('Multimode')">
+        Multimode
+      </button>
+      <button class="dropdown-item" onclick="loadData('Imports')">
+        Imports
+      </button> -->
+    <!-- </div> -->
+    <div class="dropdown-blur">
+      <img src="./static/images/loading-chat.gif" alt="" class="" />
+    </div>
+
+    <!-- previw page------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+    <!-- <div class="preview" id="preview-menu"> -->
+    <!-- toggle button -->
+    <!-- <i id="toggle-rightbar" class="fa-solid fa-angle-left"></i> -->
+
+    <!-- Close Button (cross icon) -->
+    <!-- <i id="close-rightbar" class="fa-solid fa-xmark"></i>
+
+      <h3>Tables</h3> -->
+    <!-- Right sidebar (preview) content placeholder -->
+    <!-- <div id="tabs-container"></div> -->
+    <!-- For Tabs -->
+    <!-- <div class="preview-content" id="preview-container"></div> -->
+
+    <!-- <div id="tabs-container" class="tabs"></div>
+      <button class="button" id="ok-button">OK</button>
+      <div class="preview-content" id="preview-container"></div>
+    </div> -->
+
+    <!-- ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ -->
+
+    <!-- Wrapper for Content -->
+
+    <div class="token">
+      <button id="report-button" title="Download Data Analysis Report!">
+        <i class="fa-solid fa-chart-simple"></i>
+      </button>
+
+      <div class="user-name">
+        <img src="./static/images/userlogo.png" alt="" class="userlogo_name" />
+        <h4 class="login-user">Hi, {{userName}} !</h4>
+      </div>
+
+      <!-- Loading Indicator (Initially Hidden) -->
+      <div id="loading-indicator" style="display: none">Loading...</div>
+      <h6>Units Consumed: 0.0</h6>
+    </div>
+
+    <!-- <div id="para-heading"></div> -->
+
+    <!-- Main Chat Content -->
+    <div class="content" id="chat-container"></div>
+
+    <!-- Container for the new HTML content -->
+    <div id="container"></div>
+
+    <!-- Suggestions Container -->
+    <div id="suggestions-container"></div>
+
+    <div class="input-container">
+      <!-- <input type="text" id="user-input" placeholder="Type your query here..." /> -->
+      <textarea
+        id="user-input"
+        placeholder="Type your query here..."
+        rows="1.5"
+      ></textarea>
+      <button id="sending-button">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+      <!-- <button id="send-button">
+        <i class="fa-solid fa-circle-plus"></i>
+      </button> -->
+    </div>
+
+    <footer>AI can make mistakes. Check important info.</footer>
+
+    <!-- ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+
+    <script>
+      /*------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+      window.onload = loadData;
+      /* document.addEventListener("DOMContentLoaded", () => {
+        const fileName = localStorage.getItem("uploadedFile");
+        const fileDescription = localStorage.getItem("fileDescription");
+
+        console.log("Uploaded File:", fileName);
+        console.log("File Description:", fileDescription);
+
+        // If a file was uploaded, show the "Hi, ask your query" message
+        if (fileName) {
+          addMessage("Hi, ask your query", false); // Display the bot message
+        }
+      });*/
+
+      //   document.addEventListener("DOMContentLoaded", () => {
+      // Ensure the chat container is empty initially
+      ///const chatContainer = document.getElementById("chat-container");
+      //  chatContainer.innerHTML = ""; // Clear any previous messages (if any)
+
+      // No message should be shown until the user selects a dataset
+      // Add event listener for dropdown item clicks
+      //  document
+      //   .getElementById("dropdown-menu")
+      //   .addEventListener("click", function (event) {
+      //    const clickedButton = event.target;
+
+      //   if (clickedButton.classList.contains("dropdown-item")) {
+      //    const dataset = clickedButton.innerText.trim();
+      //    resetLoad(dataset); // Call the function to handle dataset selection
+      //   }
+      //  });
+      //   });
+      // Retrieve the dataset from localStorage
+      //  const datasetName = localStorage.getItem("dataset");
+
+      //  if (datasetName) {
+      // If a dataset is found, call the resetLoad function with the dataset
+      //   loadData(datasetName);
+      //   addMessage("Hi, ask your query", false);
+      //   } else {
+      // If no dataset is found in localStorage, just show the "Hi, ask your query" message
+      //    setTimeout(() => {
+      //      addMessage("Hi, ask your query", false);
+      //    }, 100);
+      //  }
+      //  });
+
+      // Function to load data and add a bot message when a dataset is selected
+      // function resetLoad(datasetName) {
+      //   console.log("Loading data for:", datasetName);
+
+      //   const chatContainer = document.getElementById("chat-container");
+      // const paraHeading = document.getElementById("para-heading");
+
+      // Clear the chat container each time a new dataset is selected
+      // chatContainer.innerHTML = ""; // Clear previous chat content
+
+      // paraHeading.innerHTML = `Logistic - ${dataset} dataset`;
+
+      // Add the "Hi, ask your query" message
+      //  setTimeout(() => {
+      //    addMessage("Hi, ask your query", false); // Add bot message after dataset selection
+      //  }, 100);
+
+      // Optionally simulate some loading behavior or bot interaction here
+      // setTimeout(() => {
+      // Simulate loading the dataset (you can replace this with actual data fetching)
+      // addMessage(`Ready to chat about ${dataset}!`, false);
+      // }, 1500); // Delay before showing the dataset message
+      //}
+
+      function updateFrequencyInDB(datasetName, suggestion) {
+        const formData = new FormData();
+        formData.append("suggestionQuestion", suggestion);
+        formData.append("datasetName", datasetName);
+
+        fetch("/updateFrequencyCount", {
+          method: "POST",
+          body: formData,
+        })
+          .then((data) => data.json())
+          .then((data) => {
+            console.log("Success");
+          })
+          .catch((error) => {
+            console.log("Error while communicating with the server");
+            console.log(error);
+          });
+      }
+
+      document
+        .getElementById("user-input")
+        .addEventListener("keydown", function (event) {
+          // Check if the pressed key is space (32), comma (188), or question mark (191)
+          if (event.key === " " || event.key === "," || event.key === "?") {
+            console.log("Triggered");
+            const input = document.getElementById("user-input").value;
+            console.log("User entered this:", input);
+            const fileContent = new FormData();
+            fileContent.append("userEntry", input);
+            fileContent.append("count", 3);
+
+            //BACKEND TRIGGER --> Data
+            fetch("/getSuggestedQuestions", {
+              method: "POST",
+              body: fileContent,
+            })
+              .then((data) => data.json())
+              .then((data) => {
+                console.log(data);
+
+                const filteredSuggestions = data;
+                const toDisplay = filteredSuggestions;
+
+                const suggestionsContainer = document.getElementById(
+                  "suggestions-container"
+                );
+                suggestionsContainer.innerHTML = "";
+
+                let tittle = document.getElementById("tittle");
+                if (!tittle && toDisplay.length != 0) {
+                  title = document.createElement("h2");
+                  title.id = "tittle";
+                  title.textContent = "AI Suggestions";
+                  suggestionsContainer.appendChild(title);
+                }
+
+                toDisplay.forEach((suggestion) => {
+                  const suggestionElement = document.createElement("div");
+                  suggestionElement.classList.add("suggestion");
+                  suggestionElement.textContent = suggestion;
+                  suggestionElement.addEventListener("click", () => {
+                    addMessage(suggestion, true);
+
+                    document.getElementById("user-input").value = "";
+                    hideSuggestions();
+                    handleBotResponse(suggestion);
+                    //  updateFrequencyInDB(datasetName, suggestion);
+                    if (datasetName && suggestion) {
+                      console.log("thumbs-up clicked!");
+                      console.log("selected Suggestion:", suggestion);
+                      console.log("dataset:", datasetName);
+                    }
+                  });
+                  suggestionsContainer.appendChild(suggestionElement);
+                });
+
+                console.log("Displaying...");
+
+                if (toDisplay.length != 0) {
+                  suggestionsContainer.style.display = "block";
+                }
+
+                //button-->
+                let seeMoreBtn = document.getElementById("see-more");
+                if (!seeMoreBtn) {
+                  seeMoreBtn = document.createElement("a");
+                  seeMoreBtn.id = "see-more";
+                  seeMoreBtn.textContent = "See More";
+                  seeMoreBtn.addEventListener("click", showAllSuggestions); // Add event listener to show more suggestions
+                  suggestionsContainer.appendChild(seeMoreBtn);
+                }
+                seeMoreBtn.style.display = "block";
+
+                //if (filteredSuggestions.length >= shownSuggestions) {
+                //  seeMoreBtn.style.display = "block"; // Show "See More"
+                // } else {
+                //  seeMoreBtn.style.display = "none";
+                //suggestionsContainer.style.display = "none";
+                //  hideSuggestions();
+                // }
+              })
+              .catch((error) => {
+                console.log(error);
+                console.log("Error while retireval of the suggested queries");
+              });
+          }
+        });
+
+      // Function to hide suggestions
+      function hideSuggestions() {
+        const suggestionsContainer = document.getElementById(
+          "suggestions-container"
+        );
+        //console.log("printing");
+        //console.log(suggestionsContainer);
+        suggestionsContainer.style.display = "none";
+      }
+
+      // Function to show all suggestions on "See More"
+      function showAllSuggestions() {
+        const input = document.getElementById("user-input").value;
+        const fileContent = new FormData();
+        fileContent.append("userEntry", input);
+        fileContent.append("count", 10);
+
+        fetch("/getSuggestedQuestions", {
+          method: "POST",
+          body: fileContent,
+        })
+          .then((data) => data.json())
+          .then((data) => {
+            console.log(data);
+
+            const filteredSuggestions = data;
+            const toDisplay = filteredSuggestions;
+
+            const suggestionsContainer = document.getElementById(
+              "suggestions-container"
+            );
+            suggestionsContainer.innerHTML = "";
+
+            let tittle = document.getElementById("tittle");
+            if (!tittle) {
+              title = document.createElement("h2");
+              title.id = "tittle";
+              title.textContent = "AI Suggestions";
+              suggestionsContainer.appendChild(title);
+            }
+
+            toDisplay.forEach((suggestion) => {
+              const suggestionElement = document.createElement("div");
+              suggestionElement.classList.add("suggestion");
+              suggestionElement.textContent = suggestion;
+              suggestionElement.addEventListener("click", () => {
+                addMessage(suggestion, true);
+                // FUNCTION(datasetName , suggestion);
+                document.getElementById("user-input").value = "";
+                hideSuggestions();
+                handleBotResponse(suggestion);
+
+                if (datasetName && suggestion) {
+                  // console.log("thumbs-up clicked!");
+                  console.log("selected Suggestion:", suggestion);
+                  console.log("dataset:", datasetName);
+                }
+              });
+              suggestionsContainer.appendChild(suggestionElement);
+            });
+
+            console.log("Displaying...");
+
+            suggestionsContainer.style.display = "block";
+          })
+          .catch((error) => {
+            console.log(error);
+            console.log("Error while retireval of the suggested queries");
+          });
+      }
+
+      // Function to add a message to the chat container
+      function addMessage(message, isUser) {
+        const messageElement = document.createElement("div");
+        messageElement.classList.add(isUser ? "user-message" : "bot-message");
+        messageElement.textContent = message;
+        document.getElementById("chat-container").appendChild(messageElement);
+        scrollToBottom();
+      }
+
+      // Function to simulate bot response
+      //   function handleBotResponse(userInput) {
+      // This is where you would handle the bot's response logic
+      //   For now, just add a dummy bot response
+      //  setTimeout(() => {
+      //     addMessage("Bot's response to: " + userInput, false);
+      //    }, 1000);
+      //   }
+
+      // Function to ensure the chat scrolls to the bottom
+      function scrollToBottom() {
+        const chatContainer = document.getElementById("chat-container");
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      document
+        .getElementById("user-input")
+        .addEventListener("input", function () {
+          // Reset to show only the first 3 suggestions
+          //shownSuggestions = 3;
+          const inputValue = this.value; // Get the current input value
+          //   displaySuggestions(inputValue); // Re-filter and display suggestions
+
+          const seeMoreBtn = document.getElementById("see-more");
+
+          // If the input is empty, hide the "See More" button
+          if (inputValue.trim() === "") {
+            if (seeMoreBtn != null) {
+              seeMoreBtn.style.display = "none"; // Hide "See More" button if the input is cleared
+            }
+            //  suggestionsContainer.style.display = "none";
+          }
+        });
+
+      document
+        .getElementById("sending-button")
+        .addEventListener("click", () => {
+          const userInput = document.getElementById("user-input").value;
+          if (userInput) {
+            addMessage(userInput, true);
+            document.getElementById("user-input").value = "";
+            document.getElementById("user-input").style.height = "auto"; // Reset height
+            handleBotResponse(userInput);
+            hideSuggestions();
+          }
+        });
+
+      document.getElementById("download-icon").addEventListener("click", () => {
+        const chatContainer = document.getElementById("chat-container");
+
+        // Store the original styles
+        const originalMaxHeight = chatContainer.style.maxHeight;
+        const originalOverflow = chatContainer.style.overflow;
+
+        // Temporarily set styles to capture full conversation
+        chatContainer.style.maxHeight = "none"; // Remove max-height
+        chatContainer.style.overflow = "visible"; // Allow all content to be visible
+
+        // Temporarily set the height to auto to capture the full conversation
+        chatContainer.style.height = "auto";
+
+        // Force a reflow
+        chatContainer.offsetHeight; // This line triggers reflow
+
+        html2canvas(chatContainer).then((canvas) => {
+          const imgData = canvas.toDataURL("image/png");
+          const pdf = new jsPDF("p", "mm", "a4");
+          const imgWidth = 210; // A4 width in mm
+          const pageHeight = 295; // A4 height in mm
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          let heightLeft = imgHeight;
+
+          // Define padding values
+          const topPadding = 20; // in mm
+          const bottomPadding = 20; // in mm
+          let position = topPadding; // Start from top padding
+
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight - topPadding - bottomPadding; // Adjust height left
+
+          while (heightLeft >= 0) {
+            position = heightLeft - imgHeight + topPadding; // Add top padding for new page
+            pdf.addPage();
+            pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight - topPadding - bottomPadding; // Adjust height left
+          }
+
+          pdf.save("chat_conversation.pdf");
+
+          // Reset styles back to original
+          chatContainer.style.height = "";
+          chatContainer.style.maxHeight = originalMaxHeight; // Restore original max-height
+          chatContainer.style.overflow = originalOverflow; // Restore original overflow
+        });
+      });
+
+      // Retrieve data from localStorage
+      //const fileName = localStorage.getItem("uploadedFile");
+      //const fileDescription = localStorage.getItem("fileDescription");
+
+      // console.log("Uploaded File:", localStorage.getItem("uploadedFile"));
+      //console.log("File Description:", localStorage.getItem("fileDescription"));
+
+      // Display uploaded file info as user messages
+
+      // if (fileName) {
+      //   addMessage("Hi, ask your query", false);
+      // }
+      /*else {
+                addMessage("No file uploaded.", false);
+            }*/
+
+      /* if (fileDescription) {
+                addMessage(`Description: ${fileDescription}`, true);
+            } */
+      /*else {
+                addMessage("No description provided.", false);
+            }*/
+      // Function to automatically resize the textarea
+
+      /*function autoResizeTextarea() {
+        const textarea = document.getElementById("user-input");
+        textarea.style.height = "auto"; // Reset height to auto
+        textarea.style.height = textarea.scrollHeight + "px"; // Set height based on content
+      }*/
+
+      // Adjusting Textarea and suggestion container
+      function autoResizeTextarea() {
+        const textarea = document.getElementById("user-input");
+        const suggestionsContainer = document.getElementById(
+          "suggestions-container"
+        );
+
+        textarea.style.height = "auto"; // Reset height to auto
+        textarea.style.height = textarea.scrollHeight + "px"; // Set height based on content
+
+        // Adjust the bottom position of the suggestions container based on textarea height
+        const textareaHeight = textarea.scrollHeight; // Get the height of the growing textarea
+        const distanceFromBottom = 80; // Keep this constant distance between the textarea and the bottom of the screen
+
+        // Adjust the bottom value of the suggestions container to maintain the gap
+        suggestionsContainer.style.bottom =
+          textareaHeight + distanceFromBottom + 1 + "px";
+      }
+
+      // Attach the autoResizeTextarea function to the input event
+      document
+        .getElementById("user-input")
+        .addEventListener("input", autoResizeTextarea);
+
+      function showTypingIndicator() {
+        const typingIndicatorContainer = document.createElement("div");
+        typingIndicatorContainer.classList.add("typing-indicator-container"); // New container for logo and typing text
+
+        // Create the bot logo
+        const botLogoContainer = document.createElement("div");
+        botLogoContainer.classList.add("botlogo");
+
+        const botLogo = document.createElement("img");
+        botLogo.src = "./static/images/boticon.png"; // Path to your bot logo
+        botLogo.alt = "Bot Logo";
+        botLogo.classList.add("logoimage");
+
+        // Append the logo to the container
+        botLogoContainer.appendChild(botLogo);
+
+        const typingIndicator = document.createElement("div");
+        typingIndicator.classList.add("typing-indicator");
+        typingIndicator.textContent = " typing...";
+
+        // Append both the logo and typing indicator to the typing indicator container
+        typingIndicatorContainer.appendChild(botLogoContainer);
+        typingIndicatorContainer.appendChild(typingIndicator);
+
+        document
+          .getElementById("chat-container")
+          .appendChild(typingIndicatorContainer);
+        typingIndicatorContainer.scrollIntoView();
+        return typingIndicatorContainer; // Return the reference to the typing indicator
+      }
+
+      // Function to hide typing indicator
+      function hideTypingIndicator(typingIndicatorContainer) {
+        if (typingIndicatorContainer) {
+          typingIndicatorContainer.remove();
+        }
+      }
+
+      // document.addEventListener("DOMContentLoaded", () => {
+      //    const datasetName = localStorage.getItem("dataset");
+      //    const loadingState = localStorage.getItem("loading");
+
+      // Show loading GIF and blur if loading state is true
+      //   if (loadingState === "true") {
+      //     document.querySelector(".dropdown-blur").style.display = "flex"; // Show blur
+      //     document.querySelector(".dropdown-blur img").style.display = "block"; // Show loading GIF
+      //   }
+
+      //   if (datasetName) {
+      //     loadData(datasetName);
+      //     addMessage("Hi, ask your query", false);
+      //   } else {
+      //     setTimeout(() => {
+      //        addMessage("Hi, ask your query", false);
+      //      }, 100);
+      //    }
+      //  });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const datasetName = localStorage.getItem("dataset");
+        const loadingState = localStorage.getItem("loading");
+
+        // Show loading GIF and blur if loading state is true
+        /*if (loadingState === "true") {
+          document.querySelector(".dropdown-blur").style.display = "flex"; // Show blur
+          document.querySelector(".dropdown-blur img").style.display = "block"; // Show loading GIF
+        }*/
+
+        if (datasetName) {
+          //  loadData(datasetName);
+          addMessage("Hi, ask your query", false);
+        } else {
+          setTimeout(() => {
+            addMessage("Hi, ask your query", false);
+          }, 100);
+        }
+        //const dropdownMenu = document.getElementById("dropdown-menu");
+        //  const dropdownItems = document.querySelectorAll(".dropdown-item");
+        //   const toggleButton = document.getElementById("toggle-sidebar");
+        //  const closeButton = document.getElementById("close-sidebar");
+        // const dropdownBlur = document.querySelector(".dropdown-blur");
+        //  const loadingGif = dropdownBlur.querySelector("img");
+
+        // const previewMenu = document.getElementById("preview-menu");
+        // const toggleRight = document.getElementById("toggle-rightbar");
+        // const closeRight = document.getElementById("close-rightbar");
+
+        //dropdownBlur.style.display = "visible";
+        // loadingGif.style.display = "none";
+
+        //   toggleRight.addEventListener("click", () => {
+        //   previewMenu.classList.toggle("expanded");
+        //   closeRight.style.display = "visible";
+        //   toggleRight.style.display = previewMenu.classList.contains("expanded")
+        //     ? "none"
+        //     : "block";
+        //   hideSuggestions();
+        //  });
+
+        //  closeRight.addEventListener("click", () => {
+        //    previewMenu.classList.remove("expanded");
+        //    toggleRight.style.display = "block";
+        //  });
+      });
+
+      // Function to load dataset
+      // Function to load dataset
+      function loadData(datasetName) {
+        // Set the global datasetName to the selected dataset
+        //  datasetName = dataSetName;
+
+        console.log("Loading data for:", datasetName);
+
+        const fileContent = new FormData();
+        fileContent.append("datasetName", datasetName);
+
+        // Set loading state to true
+        localStorage.setItem("loading", "true");
+
+        document.querySelector(".dropdown-blur").style.display = "flex"; // Show blur
+        document.querySelector(".dropdown-blur img").style.display = "block"; // Show loading GIF
+
+        fetch("/loadDomainData", {
+          method: "POST",
+          body: fileContent,
+        })
+          .then((response) => {
+            console.log(response);
+            if (!response.ok) {
+              throw new Error("Error loading data");
+            }
+            console.log("Successfully data loaded!");
+
+            // Hide the loading GIF and blur
+            document.querySelector(".dropdown-blur img").style.display = "none";
+            document.querySelector(".dropdown-blur").style.display = "none";
+
+            // Reset the loading state in localStorage
+            localStorage.setItem("loading", "false");
+
+            // After loading the data, load the corresponding sheet preview from the Excel file
+            // loadExcelPreview(datasetName);
+          })
+          .catch((error) => {
+            console.error("Error loading the data:", error);
+
+            // Hide the loading GIF and blur
+            document.querySelector(".dropdown-blur img").style.display = "none";
+            document.querySelector(".dropdown-blur").style.display = "none";
+            // Reset the loading state in localStorage
+            localStorage.setItem("loading", "false");
+          });
+      }
+
+      // Function to load the Excel preview for the selected dataset
+      /* function loadExcelPreview(datasetName) {
+        const url = "./static/Punch%20Points%20Dataset.xlsx"; // Path to your single Excel file
+        console.log("Attempting to fetch file from:", url);
+
+        fetch(url)
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Dataset not found");
+            }
+            return response.arrayBuffer();
+          })
+          .then((data) => {
+            const workbook = XLSX.read(data, { type: "array" });
+
+            // Map dataset names to sheet names in the Excel file
+            const sheetMap = {
+              Sheet1: ["Sheet1"],
+              //  GC: ["Logistics - GC", "Logistics - GC Budget"], // GC has two sheets
+              //  Multimode: ["Logistics - Multimode"],
+              //  Imports: ["Logistics - Imports"],
+            };
+
+            const sheetNames = sheetMap[datasetName];
+
+            // Load and display the sheets
+            if (sheetNames && sheetNames.length > 0) {
+              loadMultipleSheets(workbook, sheetNames);
+            } else {
+              alert(`No sheets found for dataset: ${datasetName}`);
+            }
+          })
+          .catch((error) => {
+            console.error("Error loading Excel file:", error);
+            alert("Error loading the Excel file.");
+          });
+      }
+
+      // Function to handle loading multiple sheets
+      function loadMultipleSheets(workbook, sheetNames) {
+        const previewContainer = document.getElementById("preview-container");
+        const tabsContainer = document.getElementById("tabs-container");
+
+        previewContainer.innerHTML = ""; // Clear previous preview
+        tabsContainer.innerHTML = ""; // Clear previous tabs
+
+        // Create buttons/tabs for each sheet
+        sheetNames.forEach((sheetName, index) => {
+          const tabButton = document.createElement("button");
+          tabButton.textContent = sheetName;
+          tabButton.classList.add("tab-button");
+          tabButton.onclick = () => displaySheetPreview(workbook, sheetName);
+          tabsContainer.appendChild(tabButton);
+
+          // Display the first sheet by default
+          if (index === 0) {
+            displaySheetPreview(workbook, sheetName);
+          }
+        });
+      }
+
+      // Function to display the data as a table in the preview section
+      function displaySheetPreview(workbook, sheetName) {
+        const previewContainer = document.getElementById("preview-container");
+        previewContainer.innerHTML = ""; // Clear previous preview
+
+        // Get the selected sheet from the workbook
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+
+        if (jsonData.length > 0) {
+          const table = document.createElement("table");
+          const headerRow = document.createElement("tr");
+          const columns = Object.keys(jsonData[0]);
+
+          // Create table header
+          columns.forEach((column) => {
+            const th = document.createElement("th");
+            th.textContent = column;
+            headerRow.appendChild(th);
+          });
+          table.appendChild(headerRow);
+
+          // Create table rows
+          jsonData.forEach((row) => {
+            const tr = document.createElement("tr");
+            columns.forEach((column) => {
+              const td = document.createElement("td");
+              td.textContent = row[column] || "";
+              tr.appendChild(td);
+            });
+            table.appendChild(tr);
+          });
+
+          previewContainer.appendChild(table);
+        } else {
+          alert(`No data found in sheet: ${sheetName}`);
+        }
+      }*/
+
+      // creates and displays new messages -->
+      function addMessage(message, isUser) {
+        const messageContainer = document.createElement("div");
+        messageContainer.classList.add("message");
+
+        if (isUser) {
+          messageContainer.classList.add("message-user");
+
+          const userLogoContainer = document.createElement("div");
+          userLogoContainer.classList.add("user-logo");
+
+          const userLogo = document.createElement("img");
+          userLogo.src = "./static/images/userlogo.png";
+          userLogo.alt = "User Logo";
+          userLogo.classList.add("logo-image");
+
+          userLogoContainer.appendChild(userLogo);
+
+          const userMessageContainer = document.createElement("div");
+          userMessageContainer.classList.add("user-message-text");
+
+          // Create a paragraph element for the message
+          const messageParagraph = document.createElement("p");
+          messageParagraph.textContent = message; // Use textContent for safety
+          messageParagraph.classList.add("user-message-paragraph");
+          userMessageContainer.appendChild(messageParagraph);
+
+          messageContainer.appendChild(userMessageContainer);
+          messageContainer.appendChild(userLogoContainer);
+        } else {
+          // Bot message handling remains unchanged
+          messageContainer.classList.add("message-bot");
+
+          // Use innerHTML to replace newlines with <br> tags
+          /* userMessageContainer.innerHTML = message.replace(/\n/g, '<br>');
+
+                   // userMessageContainer.appendChild(document.createTextNode(message));
+
+                    messageContainer.appendChild(userMessageContainer);
+                    messageContainer.appendChild(userLogoContainer);
+                } else {
+                    messageContainer.classList.add('message-bot'); -->*/
+
+          const botLogoContainer = document.createElement("div");
+          botLogoContainer.classList.add("bot-logo");
+
+          const botLogo = document.createElement("img");
+          botLogo.src = "./static/images/boticon.png";
+          botLogo.alt = "Bot Logo";
+          botLogo.classList.add("logo-image");
+
+          botLogoContainer.appendChild(botLogo);
+
+          const botMessageContainer = document.createElement("div");
+          botMessageContainer.classList.add("bot-message-text");
+          botMessageContainer.innerHTML = message;
+
+          // botMessageContainer.innerHTML = message.replace(/\n/g, '<br>');
+
+          // botMessageContainer.appendChild(document.createTextNode(message));
+          messageContainer.appendChild(botLogoContainer);
+          messageContainer.appendChild(botMessageContainer);
+
+          // Set the message text to measure its width
+          /*  const messageText = messageContainer.querySelector(
+            ".user-message-text, .bot-message-text"
+          );
+          messageText.style.whiteSpace = "nowrap"; // Prevent wrapping to measure width
+          document
+            .getElementById("chat-container")
+            .appendChild(messageContainer);
+
+          // Check if the message length exceeds the max width for wrapping
+          const messageWidth = messageText.offsetWidth;
+          const maxWidth = 800; // Match this with your CSS max-width
+
+          if (messageWidth > maxWidth) {
+            messageText.style.whiteSpace = "normal"; // Allow wrapping if too long
+          } else {
+            messageText.style.whiteSpace = "nowrap";
+          }*/
+
+          // Create a container for the copy icon
+          const copyContainer = document.createElement("div");
+          copyContainer.classList.add("copy-container");
+
+          // Create FontAwesome copy icon
+          const copyIcon = document.createElement("i");
+          copyIcon.classList.add("fa-regular", "fa-copy", "copy-icon");
+          copyIcon.style.cursor = "pointer";
+
+          // Create a tooltip for hover text
+          const tooltip = document.createElement("span");
+          tooltip.classList.add("tooltip");
+          tooltip.textContent = "Copy";
+          copyContainer.appendChild(tooltip);
+
+          // Add event listener for the copy icon
+          copyIcon.addEventListener("click", () => {
+            // Copy only the text content (excluding HTML tags)
+            const plainText =
+              botMessageContainer.textContent || botMessageContainer.innerText;
+            navigator.clipboard
+              .writeText(plainText)
+              .then(() => {
+                // Hide the tooltip when the copy button is clicked
+                tooltip.style.visibility = "hidden";
+                tooltip.style.opacity = "0";
+
+                // Create a small "Copied!" text element
+                const copiedText = document.createElement("span");
+                copiedText.textContent = "Copied!";
+                copiedText.classList.add("copied-text");
+
+                // Append the "Copied!" text to the copy container
+                copyContainer.appendChild(copiedText);
+
+                // Remove the "Copied!" text after 2 seconds
+                setTimeout(() => {
+                  copyContainer.removeChild(copiedText);
+                }, 2000);
+              })
+              .catch((err) => {
+                console.error("Error copying text: ", err);
+              });
+          });
+          copyContainer.appendChild(copyIcon);
+          messageContainer.appendChild(botLogoContainer);
+          messageContainer.appendChild(botMessageContainer);
+          messageContainer.appendChild(copyContainer);
+
+          //thumbs-up icon------------------------>
+          // const datasetName = "logistics";
+          // Create a container for the thumbs-up icon
+          const thumbsContainer = document.createElement("div");
+          thumbsContainer.classList.add("thumbs-container");
+
+          // Create FontAwesome thumbs-up icon
+          const thumbIcon = document.createElement("i");
+          thumbIcon.classList.add(
+            "fa-regular",
+            "fa-thumbs-up",
+            "thumbs-up-icon"
+          );
+          thumbIcon.style.cursor = "pointer";
+
+          thumbsContainer.appendChild(thumbIcon);
+
+          // Add event listener for the thumbs-up icon------------------------------------
+          // POSITIVE FEEDBACK
+          thumbIcon.addEventListener("click", () => {
+            thumbIcon.classList.remove("fa-regular");
+            thumbIcon.classList.add("fa-solid");
+            thumbIcon.style.marginRight = "-1vw";
+            thumbsDownContainer.style.display = "none";
+            // console.log("thumbs-up clicked");
+
+            if (datasetName && userQuestion) {
+              console.log("thumbs-up clicked!");
+              console.log("user question:", userQuestion);
+              console.log("dataset:", datasetName);
+
+              const formData = new FormData();
+              formData.append("userInput", userQuestion);
+              formData.append("datasetName", datasetName);
+
+              //FETCH FUNCTION
+              fetch("/positiveFeedback", {
+                method: "POST",
+                body: formData,
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  console.log("Success");
+                })
+                .catch((error) => {
+                  console.error(
+                    "Error: Not able to communicate with server!",
+                    error
+                  );
+                });
+            }
+
+            const plainText =
+              botMessageContainer.textContent || botMessageContainer.innerText;
+            navigator.clipboard
+              .writeText(plainText)
+              .then(() => {
+                // Hide the tooltip when the copy button is clicked
+                tooltip.style.visibility = "hidden";
+                tooltip.style.opacity = "0";
+
+                // Create a small "Copied!" text element
+                const copiedText = document.createElement("span");
+                copiedText.textContent = "Thanks for the feedback!";
+                copiedText.classList.add("Thanks-text");
+
+                // Append the "Copied!" text to the copy container
+                copyContainer.appendChild(copiedText);
+
+                // Remove the "Copied!" text after 2 seconds
+                setTimeout(() => {
+                  copyContainer.removeChild(copiedText);
+                }, 2000);
+              })
+              .catch((err) => {
+                console.error("Error copying text: ", err);
+              });
+          });
+
+          thumbsContainer.appendChild(thumbIcon);
+          messageContainer.appendChild(botLogoContainer);
+          messageContainer.appendChild(botMessageContainer);
+          messageContainer.appendChild(thumbsContainer);
+
+          //thumbs-down icon--------------------------------------------------
+          // Create a container for the thumbs-up icon
+          const thumbsDownContainer = document.createElement("div");
+          thumbsDownContainer.classList.add("thumbs-down-container");
+
+          // Create FontAwesome thumbs-up icon
+          const thumbDownIcon = document.createElement("i");
+          thumbDownIcon.classList.add(
+            "fa-regular",
+            "fa-thumbs-down",
+            "thumbs-down-icon"
+          );
+          thumbDownIcon.style.cursor = "pointer";
+
+          thumbsDownContainer.appendChild(thumbDownIcon);
+
+          // Add event listener for the thumbs-down icon
+          thumbDownIcon.addEventListener("click", () => {
+            thumbDownIcon.classList.remove("fa-regular");
+            thumbDownIcon.classList.add("fa-solid");
+
+            thumbsContainer.style.display = "none";
+            //console.log("thumbs-up clicked");
+            console;
+            if (datasetName && userQuestion) {
+              console.log("thumbs-up clicked!");
+              console.log("user question:", userQuestion);
+              console.log("dataset:", datasetName);
+
+              const formData = new FormData();
+              formData.append("userInput", userQuestion);
+              formData.append("datasetName", datasetName);
+              fetch("/negativeFeedback", {
+                method: "POST",
+                body: formData,
+              })
+                .then((data) => data.json())
+                .then((data) => {
+                  console.log("success");
+                })
+                .catch((error) => {
+                  console.log("Error while communicating with the server");
+                  console.log(error);
+                });
+            }
+
+            const plainText =
+              botMessageContainer.textContent || botMessageContainer.innerText;
+            navigator.clipboard
+              .writeText(plainText)
+              .then(() => {
+                // Hide the tooltip when the copy button is clicked
+                tooltip.style.visibility = "hidden";
+                tooltip.style.opacity = "0";
+
+                // Create a small "Copied!" text element
+                const copiedText = document.createElement("span");
+                copiedText.textContent = "Thanks for the feedback!";
+                copiedText.classList.add("Thanks-text");
+
+                // Append the "Copied!" text to the copy container
+                copyContainer.appendChild(copiedText);
+
+                // Remove the "Copied!" text after 2 seconds
+                setTimeout(() => {
+                  copyContainer.removeChild(copiedText);
+                }, 2000);
+              })
+              .catch((err) => {
+                console.error("Error copying text: ", err);
+              });
+          });
+
+          thumbsDownContainer.appendChild(thumbDownIcon);
+          messageContainer.appendChild(botLogoContainer);
+          messageContainer.appendChild(botMessageContainer);
+          messageContainer.appendChild(thumbsDownContainer);
+
+          // botMessageContainer.appendChild(copyContainer); // Append copy icon to bot message container
+          //  messageContainer.appendChild(botLogoContainer);
+          //  messageContainer.appendChild(botMessageContainer);
+
+          // Append the copy icon to the message container
+          //   messageContainer.appendChild(copyContainer);
+        }
+        document.getElementById("chat-container").appendChild(messageContainer);
+        messageContainer.scrollIntoView(); // Scroll to the latest message
+      }
+      function handleBotResponse(userInput) {
+        let responseToBeSent = "None";
+        //typing indicator
+        const typingIndicator = showTypingIndicator();
+
+        fetch("/getAnswer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userInput: userInput }),
+        })
+          .then((response) =>
+            response.json().then((data) => {
+              hideTypingIndicator(typingIndicator);
+              if (response.ok) {
+                responseToBeSent = data.responseData;
+                unitsSpent = data.UnitsSpent;
+                console.log(responseToBeSent);
+
+                var tokens_block = document.querySelector(".token h6");
+                tokens_block.textContent = "Units Consumed: " + unitsSpent;
+
+                // image based responses
+                if (responseToBeSent.includes("Chart Generated Successfully")) {
+                  let startIndex = responseToBeSent.indexOf("[") + 1;
+                  let endIndex = responseToBeSent.indexOf("]");
+
+                  let fileName = responseToBeSent.substring(
+                    startIndex,
+                    endIndex
+                  );
+
+                  // -----------
+
+                  const imageMessageContainer = document.createElement("div");
+                  imageMessageContainer.classList.add("message-bot");
+
+                  const botLogoContainer = document.createElement("div");
+                  botLogoContainer.classList.add("bot-logo");
+
+                  const botLogo = document.createElement("img");
+                  botLogo.src = "./static/images/boticon.png";
+                  botLogo.alt = "Bot Logo";
+                  botLogo.classList.add("logo-image");
+
+                  botLogoContainer.appendChild(botLogo);
+                  imageMessageContainer.appendChild(botLogoContainer);
+
+                  const botMessageContainer = document.createElement("div");
+                  botMessageContainer.classList.add("bot-message-text");
+
+                  const imageContainer = document.createElement("div");
+                  imageContainer.classList.add("image-container");
+
+                  const image = document.createElement("img");
+                  image.src = "./static/charts/" + fileName;
+                  image.alt = "Bot Image";
+                  imageContainer.appendChild(image);
+
+                  //thumbs-up icon------------------------>
+                  // const datasetName = "logistics";
+                  // Create a container for the thumbs-up icon
+                  const thumbsContainer = document.createElement("div");
+                  thumbsContainer.classList.add("thumbs-container");
+
+                  // Create FontAwesome thumbs-up icon
+                  const thumbIcon = document.createElement("i");
+                  thumbIcon.classList.add(
+                    "fa-regular",
+                    "fa-thumbs-up",
+                    "thumbs-up-icon"
+                  );
+                  thumbIcon.style.cursor = "pointer";
+
+                  thumbsContainer.appendChild(thumbIcon);
+
+                  // Add event listener for the thumbs-up icon------------------------------------
+                  // POSITIVE FEEDBACK
+                  thumbIcon.addEventListener("click", () => {
+                    thumbIcon.classList.remove("fa-regular");
+                    thumbIcon.classList.add("fa-solid");
+                    thumbIcon.style.marginRight = "-1vw";
+                    thumbsDownContainer.style.display = "none";
+                    // console.log("thumbs-up clicked");
+
+                    if (datasetName && userQuestion) {
+                      console.log("thumbs-up clicked!");
+                      console.log("user question:", userQuestion);
+                      console.log("dataset:", datasetName);
+
+                      const formData = new FormData();
+                      formData.append("userInput", userQuestion);
+                      formData.append("datasetName", datasetName);
+
+                      //FETCH FUNCTION
+                      fetch("/positiveFeedback", {
+                        method: "POST",
+                        body: formData,
+                      })
+                        .then((response) => response.json())
+                        .then((data) => {
+                          console.log("Success");
+                        })
+                        .catch((error) => {
+                          console.error(
+                            "Error: Not able to communicate with server!",
+                            error
+                          );
+                        });
+                    }
+
+                    const plainText =
+                      botMessageContainer.textContent ||
+                      botMessageContainer.innerText;
+                    navigator.clipboard
+                      .writeText(plainText)
+                      .then(() => {
+                        // Hide the tooltip when the copy button is clicked
+                        tooltip.style.visibility = "hidden";
+                        tooltip.style.opacity = "0";
+
+                        // Create a small "Copied!" text element
+                        const copiedText = document.createElement("span");
+                        copiedText.textContent = "Thanks for the feedback!";
+                        copiedText.classList.add("Thanks-text");
+
+                        // Append the "Copied!" text to the copy container
+                        copyContainer.appendChild(copiedText);
+
+                        // Remove the "Copied!" text after 2 seconds
+                        setTimeout(() => {
+                          copyContainer.removeChild(copiedText);
+                        }, 2000);
+                      })
+                      .catch((err) => {
+                        console.error("Error copying text: ", err);
+                      });
+                  });
+
+                  thumbsContainer.appendChild(thumbIcon);
+                  imageMessageContainer.appendChild(botLogoContainer);
+                  imageMessageContainer.appendChild(botMessageContainer);
+                  imageMessageContainer.appendChild(thumbsContainer);
+
+                  //thumbs-down icon--------------------------------------------------
+                  // Create a container for the thumbs-up icon
+                  const thumbsDownContainer = document.createElement("div");
+                  thumbsDownContainer.classList.add("thumbs-down-container");
+
+                  // Create FontAwesome thumbs-up icon
+                  const thumbDownIcon = document.createElement("i");
+                  thumbDownIcon.classList.add(
+                    "fa-regular",
+                    "fa-thumbs-down",
+                    "thumbs-down-icon"
+                  );
+                  thumbDownIcon.style.cursor = "pointer";
+
+                  thumbsDownContainer.appendChild(thumbDownIcon);
+
+                  // Add event listener for the thumbs-down icon
+                  thumbDownIcon.addEventListener("click", () => {
+                    thumbDownIcon.classList.remove("fa-regular");
+                    thumbDownIcon.classList.add("fa-solid");
+
+                    thumbsContainer.style.display = "none";
+                    //console.log("thumbs-up clicked");
+                    console;
+                    if (datasetName && userQuestion) {
+                      console.log("thumbs-up clicked!");
+                      console.log("user question:", userQuestion);
+                      console.log("dataset:", datasetName);
+
+                      const formData = new FormData();
+                      formData.append("userInput", userQuestion);
+                      formData.append("datasetName", datasetName);
+                      fetch("/negativeFeedback", {
+                        method: "POST",
+                        body: formData,
+                      })
+                        .then((data) => data.json())
+                        .then((data) => {
+                          console.log("success");
+                        })
+                        .catch((error) => {
+                          console.log(
+                            "Error while communicating with the server"
+                          );
+                          console.log(error);
+                        });
+                    }
+
+                    const plainText =
+                      botMessageContainer.textContent ||
+                      botMessageContainer.innerText;
+                    navigator.clipboard
+                      .writeText(plainText)
+                      .then(() => {
+                        // Hide the tooltip when the copy button is clicked
+                        tooltip.style.visibility = "hidden";
+                        tooltip.style.opacity = "0";
+
+                        // Create a small "Copied!" text element
+                        const copiedText = document.createElement("span");
+                        copiedText.textContent = "Thanks for the feedback!";
+                        copiedText.classList.add("Thanks-text");
+
+                        // Append the "Copied!" text to the copy container
+                        copyContainer.appendChild(copiedText);
+
+                        // Remove the "Copied!" text after 2 seconds
+                        setTimeout(() => {
+                          copyContainer.removeChild(copiedText);
+                        }, 2000);
+                      })
+                      .catch((err) => {
+                        console.error("Error copying text: ", err);
+                      });
+                  });
+
+                  thumbsDownContainer.appendChild(thumbDownIcon);
+                  imageMessageContainer.appendChild(botLogoContainer);
+                  imageMessageContainer.appendChild(botMessageContainer);
+                  imageMessageContainer.appendChild(thumbsDownContainer);
+
+                  // create a download icon
+                  const downloadIcon = document.createElement("i");
+                  downloadIcon.classList.add(
+                    "fa-solid",
+                    "fa-download",
+                    "download-icon"
+                  );
+                  downloadIcon.style.cursor = "pointer";
+
+                  // Add event listener for the download icon
+                  downloadIcon.addEventListener("click", () => {
+                    const link = document.createElement("a");
+                    link.href = "./static/charts/" + fileName;
+                    link.download = "./static/charts/" + fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  });
+
+                  imageContainer.appendChild(downloadIcon);
+                  botMessageContainer.appendChild(imageContainer);
+
+                  imageMessageContainer.appendChild(botMessageContainer);
+                  document
+                    .getElementById("chat-container")
+                    .appendChild(imageMessageContainer);
+                  imageMessageContainer.scrollIntoView(); // Scroll to the latest message
+                }
+
+                // text based responses
+                else {
+                  addMessage(responseToBeSent, false);
+                }
+              } else {
+                // Handle the case where the response is not OK
+                addMessage("Unable to fetch. Please refresh.", false);
+              }
+            })
+          )
+          .catch((error) => {
+            console.error("Error: Not able to communicate with server!", error);
+            hideTypingIndicator(typingIndicator);
+            addMessage("Unable to fetch. Please refresh.", false);
+          });
+      }
+
+      const reportButton = document.getElementById("report-button");
+      const loadingIndicator = document.getElementById("loading-indicator");
+
+      document
+        .getElementById("report-button")
+        .addEventListener("click", function () {
+          // Disable the button and show loading indicator
+          reportButton.disabled = true;
+          loadingIndicator.style.display = "block";
+
+          // Start the fetch request to the backend
+          fetch("/generateReport")
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error("Failed to generate report");
+              }
+              return response.blob(); // Return the file as a blob (HTML file in this case)
+            })
+            .then((blob) => {
+              // Once the file is received, trigger the download
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = "Report.html"; // Name of the file to download
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+            })
+            .catch((err) => {
+              console.error("Error downloading the file:", err);
+              alert(
+                "An error occurred while generating the report. Please try again."
+              );
+            })
+            .finally(() => {
+              // Re-enable the button and hide the loading indicator once the process is complete
+              reportButton.disabled = false;
+              loadingIndicator.style.display = "none"; // Hide the loading indicator
+            });
+        });
+
+      let userQuestion = "";
+
+      // Add an event listener for pressing the Enter key
+      document
+        .getElementById("user-input")
+        .addEventListener("keypress", (event) => {
+          if (event.key === "Enter") {
+            hideSuggestions();
+            if (event.shiftKey) {
+              // Allow the new line if Shift is held
+              return; // Do nothing, let the textarea handle the new line
+            } else {
+              // Prevent the default action and handle the message
+              event.preventDefault();
+              const userInput = document.getElementById("user-input").value;
+              if (userInput) {
+                userQuestion = document
+                  .getElementById("user-input")
+                  .value.trim();
+                console.log("User Question Stored:", userQuestion);
+
+                addMessage(userInput, true);
+                document.getElementById("user-input").value = "";
+                document.getElementById("user-input").style.height = "auto"; // Reset height
+                handleBotResponse(userInput);
+              }
+            }
+          }
+        });
+      // Add an event listener for pressing the Enter key
+      document.getElementById("user-input").addEventListener("input", () => {
+        const userInput = document.getElementById("user-input").value.trim();
+        if (userInput.length > 0) {
+        } else {
+          hideSuggestions();
+        }
+      });
+    </script>
+  </body>
+</html>

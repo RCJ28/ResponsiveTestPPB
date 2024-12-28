@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PunchPoint Bot</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700"
+  />
+    <link rel="icon" type="image/png" href="./static/images/lnt logo.png" />
+    <style>
+      /* Global styles */
+      body,html {
+        margin: 0;
+        padding:0;
+        font-family: Poppins, Helvetica, sans-serif;
+        font-weight: bold;
+        height: 100%; /* Ensure full screen height */
+        width:100%;
+        overflow: auto; /* Prevent scrolling */
+      }
+
+      .navbar {
+        background-color: #1c3f60;
+        color: white;
+        padding: 3vh;
+        display: flex;
+        align-items: center;
+        position: relative;
+      }
+
+      .navbar h2 {
+        margin: 0;
+        flex-grow: 1;
+        text-align: center;
+        font-size: 1.4vw;
+        margin-left: 13vw;
+      }
+
+      .navbar img {
+        height: 5vw;
+        width: auto;
+        margin-top: -3vh;
+        margin-bottom: -3vh;
+      }
+
+
+
+      .user-logo {
+        height: 3.2vh;
+        width: 2.4vw;
+        top: 12vh;
+        left: 87.5vw;
+      }
+
+      /* Main content styles */
+      .main-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 80vh; /* Remaining height after navbar */
+        width:100vw;
+        flex-direction: column;
+        overflow-y: auto;
+      }
+
+      .container {
+        width: 75%;
+        height: 70%;
+        background-color: #1c3f60;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 2vw;
+        box-sizing: border-box;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: auto;
+        scrollbar-width: 0;
+      }
+
+
+
+      table {
+        width: 100%;
+        display: inline-block;
+        border-collapse: separate; /* Ensure borders are not collapsed */
+        border-spacing: 1vw; 
+        overflow:auto;
+      }
+
+      /* Scrollbar Track */
+table::-webkit-scrollbar {
+  width: 0.5vw; /* Width of the scrollbar */
+}
+
+/* Scrollbar Thumb */
+table::-webkit-scrollbar-thumb {
+  background-color: #888; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Round the corners of the thumb */
+  border: 3px solid #1c3f60; /* Border around the thumb */
+}
+
+/* Scrollbar Thumb on hover */
+table::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Change thumb color when hovered */
+}
+
+/* Scrollbar Track (background) */
+table::-webkit-scrollbar-track {
+  background-color: #1c3f60; /* Light background color for the track */
+  border-radius: 10px; /* Round the corners of the track */
+}
+
+/* Optional: Scrollbar Corner */
+table::-webkit-scrollbar-corner {
+  background-color: transparent; /* Remove any default corner styling */
+}
+
+
+     
+
+      th,
+      td {
+        padding: 0.8vh;
+        text-align: center;
+       
+      }
+
+      th {
+        font-size:1.5vw;
+        background-color: #1c3f60;
+        color: white;
+        padding-bottom:2vw;
+      }
+
+      th:nth-child(1), td:nth-child(1) { width: 70%; } /* PP column */
+  th:nth-child(2), td:nth-child(2) { width: 10%; } /* EP column */
+  th:nth-child(3), td:nth-child(3) { width: 10%; } /* C column */
+  th:nth-child(4), td:nth-child(4) { width: 10%; } /* Validation column */
+
+/* Adjust the margin or padding to control space between columns */
+th:nth-child(2) , td:nth-child(2){
+  padding-left: 4vw; /* Space between PP and EP */
+  align-items: right;
+}
+
+th:nth-child(3) , td:nth-child(3){
+  padding-right: 4vw; /* Space between PP and EP */
+  align-items: left;
+}
+   
+      .pp {
+        width: 60%; /* PunchPoint column width */
+      }
+
+      .ep, .c {
+        width: 2%; /* EP and C columns width */
+      }
+
+      .validation {
+        width: 5%; /* Validation column width */
+      }
+
+      /* Radio Buttons for EP and C */
+      .ep input,
+      .c input {
+        width:2vw;
+        height:2vw; /* Increase size of radio buttons */
+      }
+
+      /* Input Styles */
+      .pp input {
+  width: 100%; /* Ensure full width of allocated space */
+  height:1vw;
+  padding: 1.5vw 2vw;
+  font-size: 1vw;;
+  box-sizing: border-box; /* Prevent overflow */
+  overflow: auto; /* Prevent text overflow */
+  border: 2px solid white; /* Dark border color */
+  border-radius: 8px; /* Rounded corners */
+  background-color: #fff; /* White background */
+  transition: border-color 0.3s ease; /* Smooth transition on focus */
+}
+
+      /* Toggle Buttons for Validation */
+      .validation .btn-group {
+        display: flex;
+        justify-content: space-around;
+      }
+
+      .validation button {
+        padding: 0.5vw 0.2vw;
+        font-size: 1vw;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      /* Predict Button */
+      .predict-button {
+        font-family:Poppins, Helvetica, sans-serif;
+        margin-top: 1.5vw;
+        padding: 0.5vw 2vw;
+        background-color: #1c3f60;
+        color: white;
+        border: none;
+        font-size: 1.3vw;
+        cursor: pointer;
+        align-self: center;
+        border-radius: 0.3vw;
+      }
+
+      .yesbutton:hover{
+        background-color: green;
+        color:white;
+        font-weight: bold;
+        border: None;
+
+      }
+
+      .user-name {
+        margin-top:1vw;
+        display: flex;
+        align-items: center; /* Aligns items vertically in the center */
+        justify-content: flex-end; /* Aligns the content to the right */
+        font-size:0.9vw;
+    }
+    .login-user {
+        margin: 0; /* Remove default margin from h4 */
+        text-align: left; /* Align the text left if needed */
+    }
+    
+
+      input[type="radio"]{
+        accent-color: orange;
+        pointer-events: none;
+  }
+
+  input[type="text"]{
+    font-family:Poppins, Helvetica, sans-serif;
+  }
+
+      .nobutton:hover{
+        background-color: red;
+        color:white;
+        font-weight: bold;
+        border: None;
+
+      }
+
+      .add-rows-button{
+        font-family:Poppins, Helvetica, sans-serif;
+        font-size:0.9vw;
+        background-color: transparent;
+        border: none;
+        color:white;
+        cursor: pointer;
+        opacity: 0.7;
+      }
+
+      .add-row-button-col{
+        text-align: left;
+      }
+ 
+      @media only screen and (max-width: 768px) and (orientation: landscape) {
+  .main-content {
+    justify-content: flex-start;
+    /* Optional: Adjust other styles for landscape mode */
+  }
+
+  .predict-button {
+        margin-top: 1.5vw;
+        padding: 1vw 2vw;
+        background-color: #1c3f60;
+        color: white;
+        border: none;
+        font-size: 1.5vw;
+        cursor: pointer;
+      }
+}
+    </style>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <div class="navbar">
+      <h2>Punch Point - AI Classifier</h2>
+      <img src="./static/images/LTEH Logo.png" alt="Logo" class="logo" />
+    </div>
+    <div class="user-name">
+      <img src="./static/images/userlogo.png" alt="" class="user-logo" />
+      <h4 class="login-user" style="text-align: center">Hi, {{userName}} !</h4>
+    </div>
+
+    <!-- Main Content Start-->
+    <div class="main-content">
+      <div class="container">
+        <!-- Table with PunchPoint, EP, C, Validation -->
+    
+        <table>
+          <thead>
+            <tr>
+              <th class="pp">PunchPoint</th>
+              <th class="ep">EP</th>
+              <th class="c">C</th>
+              <th class="validation">Validation</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Row 1 -->
+            <tr>
+              <td class="pp">
+                <input type="text" id="punch-point-1" placeholder="Enter Punch Point 1">
+              </td>
+              <td class="ep">
+                <input type="radio" name="ep-1" id="ep-1" value="EP">
+              </td>
+              <td class="c">
+                <input type="radio" name="c-1" id="c-1" value="C">
+              </td>
+              <td class="validation">
+                <div class="btn-group">
+                  <button onclick="setValidationStatus(1, 'Yes')" class="yesbutton">Yes</button>
+                  <button onclick="setValidationStatus(1, 'No')" class="nobutton">No</button>
+                </div>
+               
+              </td>
+            </tr>
+            <!-- Row 2 -->
+            <tr>
+              <td class="pp">
+                <input type="text" id="punch-point-2" placeholder="Enter Punch Point 2">
+              </td>
+              <td class="ep">
+                <input type="radio" name="ep-2" id="ep-2" value="EP">
+              </td>
+              <td class="c">
+                <input type="radio" name="c-2" id="c-2" value="C">
+              </td>
+              <td class="validation">
+                <div class="btn-group">
+                  <button onclick="setValidationStatus(2, 'Yes')" class="yesbutton">Yes</button>
+                  <button onclick="setValidationStatus(2, 'No')" class="yesbutton">No</button>
+                </div>
+                
+              </td>
+            </tr>
+            <!-- Row 3 -->
+            <tr>
+              <td class="pp">
+                <input type="text" id="punch-point-3" placeholder="Enter Punch Point 3">
+              </td>
+              <td class="ep">
+                <input type="radio" name="ep-3" id="ep-3" value="EP">
+              </td>
+              <td class="c">
+                <input type="radio" name="c-3" id="c-3" value="C">
+              </td>
+              <td class="validation">
+                <div class="btn-group">
+                  <button onclick="setValidationStatus(3, 'Yes')" class="yesbutton">Yes</button>
+                  <button onclick="setValidationStatus(3, 'No')" class="yesbutton">No</button>
+                </div>
+               
+              </td>
+            </tr>
+            
+
+            <tr id="add-row-button-row">
+              <td class="add-row-button-col" >
+                
+                  <button class="add-rows-button" onclick="addRow()">
+                    <i class="fas fa-plus"></i> Add More Rows
+                  </button>
+               
+              </td>
+
+            </tr>
+          </tbody>
+        </table>
+  
+         
+      </div>
+    
+
+      <!-- Predict Button -->
+      <button class="predict-button" onclick="predict()">Predict</button>
+    </div>
+    <!-- Main Content End-->
+
+    <script>
+       
+       function addRow() {
+  const tableBody = document.querySelector('#table-body');
+  const addRowButtonRow = document.querySelector('#add-row-button-row');
+
+  // Create the new row
+  const newRow = document.createElement('tr');
+  newRow.innerHTML = `
+    <td class="pp">
+      <input type="text" placeholder="Enter Punch Point">
+    </td>
+    <td class="ep">
+      <input type="radio" name="ep-new" value="EP">
+    </td>
+    <td class="c">
+      <input type="radio" name="c-new" value="C">
+    </td>
+    <td class="validation">
+      <div class="btn-group">
+        <button class="yesbutton">Yes</button>
+        <button class="nobutton">No</button>
+      </div>
+    </td>
+  `;
+
+  // Insert the new row above the "Add Row" button row
+  tableBody.insertBefore(newRow, addRowButtonRow);
+
+}
+
+
+
+
+
+      // Validation status function
+      function setValidationStatus(row, value) {
+        // Set the validation status for the row
+        row.querySelector(".validation button").textContent = value;
+      }
+      function setValidationStatus(row, value) {
+        document.getElementById(`validation-status-${row}`).textContent = value;
+      }
+
+      function predict() {
+  let data = {};
+
+  // Loop through all rows in the table body
+  const tableRows = document.querySelectorAll('#table-body tr');
+  
+  // Collect data for each row
+  tableRows.forEach((row, index) => {
+    const punchPointInput = row.querySelector('.pp input');
+
+    // Only proceed if the input exists and the PunchPoint value is not empty
+    if (punchPointInput && punchPointInput.value.trim() !== "") {
+      // Add the punch point to the dictionary with index starting from 1
+      data[index + 1] = punchPointInput.value;
+
+    }
+  });
+
+
+  fetch("/getClassification", {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json', // Specify the data type
+    },
+    body: JSON.stringify(data),
+})
+.then((result) => result.json())
+.then((result) => {
+console.log(result);
+tableRows.forEach((row, index) => {
+    
+    const punchPointInput = row.querySelector('.pp input');
+
+    // Only proceed if the input exists and the PunchPoint value is not empty
+    if (punchPointInput && punchPointInput.value.trim() !== "") {
+      const epRadioButton = row.querySelector('.ep input');
+    const cRadioButton = row.querySelector('.c input');
+
+
+      // Get the random value for this row
+      const outputValue = result[index+1];
+      console.log(outputValue);
+
+      if (outputValue === "EP") {
+        epRadioButton.checked = true;  // Activate EP radio button
+        cRadioButton.checked = false;  // Deactivate C radio button
+      } else {
+        cRadioButton.checked = true;  // Activate C radio button
+        epRadioButton.checked = false;  // Deactivate EP radio button
+      }
+  }
+  });
+
+})
+.catch((error) => {
+    console.log("Error while communicating with the server");
+    console.log(error);
+});
+
+
+  
+
+
+}
+
+
+
+
+
+      
+    </script>
+  </body>
+</html>
